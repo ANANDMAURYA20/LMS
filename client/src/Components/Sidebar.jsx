@@ -39,6 +39,7 @@ export default function Sidebar({ hideBar = false }) {
 
   if (!hideBar) {
     return (
+      
       <div className="drawer absolute left-0 z-50 w-fit">
         <input className="drawer-toggle" id="my-drawer" type="checkbox" />
         <div className="drawer-content ">

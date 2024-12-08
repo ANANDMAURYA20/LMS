@@ -12,32 +12,36 @@ const initialState = {
 }
 
 // ....get razorpay key id.....
-export const getRazorPayId = createAsyncThunk("/payments/keyId", async () => {
+export const getRazorPayId = createAsyncThunk("/api/v1/payments/keyId", async () => {
     try {
-        const response = await axiosInstance.get("/payments/razorpay-key");
+        const response = await axiosInstance.get("/api/v1/payments/razorpay-key");
+        console.log(response)
         return response?.data;
     } catch (error) {
+        console.log(error)
         toast.error("Failed to load data");
         throw error
     }
 })
 
 // ....purchase course bundle.....
-export const purchaseCourseBundle = createAsyncThunk("/payments/subscribe", async () => {
+export const purchaseCourseBundle = createAsyncThunk("/api/v1/payments/subscribe", async () => {
     try {
-        const response = await axiosInstance.post("/payments/subscribe");
+        const response = await axiosInstance.post("/api/v1/payments/subscribe");
+        console.log(response.data)
         return response?.data;
     } catch (error) {
+        console.log(error)
         toast.error(error?.response?.data?.message);
         throw error
     }
 })
 
 // ....verify payment.....
-export const verifyUserPayment = createAsyncThunk("/payments/verify", async (data) => {
+export const verifyUserPayment = createAsyncThunk("/api/v1/payments/verify", async (data) => {
     const loadingId = toast.loading("Subscribing bundle...");
     try {
-        const response = await axiosInstance.post("/payments/verify", data);
+        const response = await axiosInstance.post("/api/v1/payments/verify", data);
         toast.success("Payment verified", { id: loadingId });
         return response?.data;
     } catch (error) {
@@ -47,10 +51,10 @@ export const verifyUserPayment = createAsyncThunk("/payments/verify", async (dat
 })
 
 // .....get payment record......
-export const getPaymentRecord = createAsyncThunk("/payments/record", async () => {
+export const getPaymentRecord = createAsyncThunk("/api/v1/payments/record", async () => {
     const loadingId = toast.loading("Getting the payment records");
     try {
-        const response = await axiosInstance.get("/payments?count=100");
+        const response = await axiosInstance.get("/api/v1/payments?count=100");
         toast.success(response?.data?.message, {id: loadingId});
         return response?.data;
     } catch (error) {
@@ -60,10 +64,10 @@ export const getPaymentRecord = createAsyncThunk("/payments/record", async () =>
 });
 
 // .....cancel subscription......
-export const cancelCourseBundle = createAsyncThunk("/payments/cancel", async () => {
+export const cancelCourseBundle = createAsyncThunk("/api/v1/payments/cancel", async () => {
     const loadingId = toast.loading("unsubscribing the bundle...")
     try {
-        const response = await axiosInstance.post("/payments/unsubscribe");
+        const response = await axiosInstance.post("/api/v1/payments/unsubscribe");
         toast.success(response?.data?.message, {id: loadingId});
         return response?.data;
     } catch (error) {
@@ -84,7 +88,7 @@ const razoraySlice = createSlice({
 
         // for purchase course bundle
         builder.addCase(purchaseCourseBundle.fulfilled, (state, action) => {
-            state.subscription_id = action?.payload?.subscription_id
+            state.subscription_id = action.payload?.subscription_id || null;
         })
 
         // for verify payment

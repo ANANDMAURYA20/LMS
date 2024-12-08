@@ -3,6 +3,7 @@ import userModel from "../models/user.model.js";
 import AppError from "../utils/error.utils.js";
 import { razorpay } from "../server.js";
 import crypto from 'crypto';
+import { error } from 'console';
 
 export const getRazorPayApiKey = async (req, res, next) => {
     try {
@@ -47,6 +48,7 @@ export const buySubscription = async (req, res, next) => {
             subscription_id: subscription.id,
         });
     } catch (e) {
+        console.log(error)
         return next(new AppError(e.message, 500));
     }
 };

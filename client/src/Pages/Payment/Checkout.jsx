@@ -7,9 +7,11 @@ import {
   getRazorPayId,
   purchaseCourseBundle,
   verifyUserPayment,
+  
 } from "../../Redux/Slices/RazorpaySlice";
 import toast from "react-hot-toast";
 import { getUserData } from "../../Redux/Slices/AuthSlice";
+console.log(getUserData)
 
 export default function Checkout() {
   const dispatch = useDispatch();
@@ -24,13 +26,14 @@ export default function Checkout() {
   const userData = useSelector((state) => state?.auth?.data);
   const paymentDetails = {
     razorpay_payment_id: "",
-    razorpay_subscription_id: "",
     razorpay_signature: "",
   };
 
   async function handleSubscription(e) {
     e.preventDefault();
-    if (!rzorpayKey || !subscription_id) {
+    if (!rzorpayKey) {
+      console.log(rzorpayKey);
+      console.log(subscription_id);
       toast.error("something went wrong");
       return;
     }
@@ -38,12 +41,14 @@ export default function Checkout() {
     const options = {
       key: rzorpayKey,
       subscription_id: subscription_id,
-      name: "Coursify Pvt Ltd",
+      name: "Lyceum Pvt. LTD",
       description: "subscription",
+      amount: 49900, // Set amount to 499
       theme: {
         color: "#fff",
       },
       prefill: {
+        
         email: userData?.email,
         name: userData?.fullName,
       },

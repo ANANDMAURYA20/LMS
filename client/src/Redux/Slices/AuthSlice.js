@@ -9,10 +9,10 @@ const initialState = {
 }
 
 // .....signup.........
-export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
+export const createAccount = createAsyncThunk("/api/v1/user/register", async (data) => {
     const loadingMessage = toast.loading("Please wait! creating your account...");
     try {
-        const res = await axiosInstance.post("/user/register", data);
+        const res = await axiosInstance.post("/api/v1/user/register", data);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -22,10 +22,10 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
 })
 
 // .....Login.........
-export const login = createAsyncThunk("/auth/login", async (data) => {
+export const login = createAsyncThunk("/api/v1/user/login", async (data) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
     try {
-        const res = await axiosInstance.post("/user/login", data);
+        const res = await axiosInstance.post("/api/v1/user/login", data);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -35,10 +35,10 @@ export const login = createAsyncThunk("/auth/login", async (data) => {
 })
 
 // .....Logout.........
-export const logout = createAsyncThunk("/auth/logout", async () => {
+export const logout = createAsyncThunk("/api/v1/user/logout", async () => {
     const loadingMessage = toast.loading("logout...");
     try {
-        const res = await axiosInstance.get("/user/logout");
+        const res = await axiosInstance.get("/api/v1/user/logout");
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -61,10 +61,10 @@ export const getUserData = createAsyncThunk("/auth/user/me", async () => {
 })
 
 // .....update user data.........
-export const updateUserData = createAsyncThunk("/auth/user/me", async (data) => {
+export const updateUserData = createAsyncThunk("/api/v1/user/me", async (data) => {
     const loadingMessage = toast.loading("Updating changes...");
     try {
-        const res = await axiosInstance.post(`/user/update/${data.id}`, data.formData);
+        const res = await axiosInstance.post(`/api/v1/user/update/${data.id}`, data.formData);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -75,11 +75,11 @@ export const updateUserData = createAsyncThunk("/auth/user/me", async (data) => 
 
 // .....change user password.......
 export const changePassword = createAsyncThunk(
-    "/auth/user/changePassword",
+    "/api/v1/user/changePassword",
     async (userPassword) => {
         const loadingMessage = toast.loading("Changing password...");
         try {
-            const res = await axiosInstance.post("/user/change-password", userPassword);
+            const res = await axiosInstance.post("/api/v1/user/change-password", userPassword);
             toast.success(res?.data?.message, { id: loadingMessage });
             return res?.data
         } catch (error) {
@@ -91,11 +91,11 @@ export const changePassword = createAsyncThunk(
 
 // .....forget user password.....
 export const forgetPassword = createAsyncThunk(
-    "auth/user/forgetPassword",
+    "/api/v1/user/forgetPassword",
     async (email) => {
         const loadingMessage = toast.loading("Please Wait! sending email...");
         try {
-            const res = await axiosInstance.post("/user/reset", {email});
+            const res = await axiosInstance.post("/api/v1/user/reset", {email});
             toast.success(res?.data?.message, { id: loadingMessage });
             return res?.data
         } catch (error) {
@@ -107,10 +107,10 @@ export const forgetPassword = createAsyncThunk(
 
 
 // .......reset the user password......
-export const resetPassword = createAsyncThunk("/user/reset", async (data) => {
+export const resetPassword = createAsyncThunk("/api/v1/user/reset", async (data) => {
     const loadingMessage = toast.loading("Please Wait! reseting your password...");
     try {
-        const res = await axiosInstance.post(`/user/reset/${data.resetToken}`,
+        const res = await axiosInstance.post(`/api/v1/user/reset/${data.resetToken}`,
             { password: data.password }
         );
         toast.success(res?.data?.message, { id: loadingMessage });

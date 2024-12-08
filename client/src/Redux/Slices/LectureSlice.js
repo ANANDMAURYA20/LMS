@@ -7,10 +7,10 @@ const initialState = {
 }
 
 // .....get lectures for a specific course....
-export const getCourseLectures = createAsyncThunk("/courses/lecture/get", async (id) => {
+export const getCourseLectures = createAsyncThunk("/api/v1/courses/lecture/get", async (id) => {
     const loadingId = toast.loading("Fetching Lectures...");
     try {
-        const res = await axiosInstance.get(`/courses/${id}`);
+        const res = await axiosInstance.get(`/api/v1/courses/${id}`);
         toast.success("Lectures Fetching Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {
@@ -20,10 +20,10 @@ export const getCourseLectures = createAsyncThunk("/courses/lecture/get", async 
 })
 
 // .....add course lecture for a specific course....
-export const addCourseLecture = createAsyncThunk("/courses/lecture/add", async (data) => {
+export const addCourseLecture = createAsyncThunk("/api/v1/courses/lecture/add", async (data) => {
     const loadingId = toast.loading("Adding Lecture...");
     try {
-        const res = await axiosInstance.post(`/courses/${data.id}`, data.formData);
+        const res = await axiosInstance.post(`/api/v1/courses/${data.id}`, data.formData);
         toast.success("Lecture Added Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {
@@ -33,11 +33,11 @@ export const addCourseLecture = createAsyncThunk("/courses/lecture/add", async (
 })
 
 // .....delete course lecture for a specific course....
-export const deleteCourseLecture = createAsyncThunk("/courses/lecture/delete", async (data) => {
+export const deleteCourseLecture = createAsyncThunk("/api/v1/courses/lecture/delete", async (data) => {
     const loadingId = toast.loading("Deleting Lecture...");
     console.log(data);
     try {
-        const res = await axiosInstance.delete(`/courses?courseId=${data.courseId}&lectureId=${data.lectureId}`);
+        const res = await axiosInstance.delete(`/api/v1/courses?courseId=${data.courseId}&lectureId=${data.lectureId}`);
         toast.success("Lecture Deleted Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {

@@ -21,6 +21,7 @@ import Layout from "../../Layout/Layout";
 import { getAllCourses, deleteCourse } from "../../Redux/Slices/CourseSlice";
 import { getPaymentRecord } from "../../Redux/Slices/RazorpaySlice";
 import { getStatsData } from "../../Redux/Slices/StatSlice";
+import { getUserData } from "../../Redux/Slices/AuthSlice";
 ChartJS.register(
   ArcElement,
   BarElement,

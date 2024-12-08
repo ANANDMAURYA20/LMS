@@ -7,10 +7,10 @@ const initialState = {
 }
 
 // ....get all courses....
-export const getAllCourses = createAsyncThunk("/courses/get", async () => {
+export const getAllCourses = createAsyncThunk("/api/v1/courses/get", async () => {
     const loadingMessage = toast.loading("fetching courses...");
     try {
-        const res = await axiosInstance.get("/courses");
+        const res = await axiosInstance.get("/api/v1/courses");
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -20,10 +20,10 @@ export const getAllCourses = createAsyncThunk("/courses/get", async () => {
 })
 
 // ....create course....
-export const createNewCourse = createAsyncThunk("/courses/create", async (data) => {
+export const createNewCourse = createAsyncThunk("/api/v1/courses/create", async (data) => {
     const loadingMessage = toast.loading("Creating course...");
     try {
-        const res = await axiosInstance.post("/courses", data);
+        const res = await axiosInstance.post("/api/v1/courses", data);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -33,10 +33,10 @@ export const createNewCourse = createAsyncThunk("/courses/create", async (data) 
 })
 
 // ....delete course......
-export const deleteCourse = createAsyncThunk("/course/delete", async (id) => {
+export const deleteCourse = createAsyncThunk("/api/v1/courses/delete", async (id) => {
     const loadingId = toast.loading("deleting course ...")
     try {
-        const response = await axiosInstance.delete(`/courses/${id}`);
+        const response = await axiosInstance.delete(`/api/v1/courses/${id}`);
         toast.success("Courses deleted successfully", { id: loadingId });
         return response?.data
     } catch (error) {

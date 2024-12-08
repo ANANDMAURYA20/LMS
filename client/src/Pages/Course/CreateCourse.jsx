@@ -10,7 +10,7 @@ import TextArea from "../../Components/InputBox/TextArea";
 export default function CreateCourse() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [userInput, setUserInput] = useState({
     title: "",

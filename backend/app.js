@@ -18,7 +18,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
-app.use(cors({ origin: [process.env.CLIENT_URL], credentials: true }));
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow requests from your frontend origin
+    methods: ['GET', 'POST'], // Specify allowed methods
+    credentials: true, // Allow cookies if needed
+}));
 
 
 app.use('/api/v1/user', userRoutes); 
@@ -27,8 +31,12 @@ app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/', miscellaneousRoutes);
  
 
-app.all('*', (req, res) => {
-    res.status(404).send('OOPS!! 404 page not found');
+// app.all('*', (req, res) => {
+//     res.status(404).send('OOPS!! 404 page not found');
+// })
+
+app.get('/', (req, res) => {
+    res.send('Server is running');
 })
 
 app.use(errorMiddleware);
