@@ -7,11 +7,9 @@ import {
   getRazorPayId,
   purchaseCourseBundle,
   verifyUserPayment,
-  
 } from "../../Redux/Slices/RazorpaySlice";
 import toast from "react-hot-toast";
 import { getUserData } from "../../Redux/Slices/AuthSlice";
-console.log(getUserData)
 
 export default function Checkout() {
   const dispatch = useDispatch();
@@ -27,14 +25,17 @@ export default function Checkout() {
   const paymentDetails = {
     razorpay_payment_id: "",
     razorpay_signature: "",
+    razorpay_subscription_id: subscription_id,
+    
   };
 
   async function handleSubscription(e) {
     e.preventDefault();
-    if (!rzorpayKey) {
-      console.log(rzorpayKey);
-      console.log(subscription_id);
-      toast.error("something went wrong");
+    if (!rzorpayKey || !subscription_id) {
+      console.log(subscription_id)
+      console.log(rzorpayKey)
+      console.error("Missing RazorPay key or subscription ID");
+      toast.error("Something went wrong");
       return;
     }
 
@@ -43,7 +44,7 @@ export default function Checkout() {
       subscription_id: subscription_id,
       name: "Lyceum Pvt. LTD",
       description: "subscription",
-      amount: 49900, // Set amount to 499
+      amount: 49900, 
       theme: {
         color: "#fff",
       },

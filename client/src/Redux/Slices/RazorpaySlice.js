@@ -18,7 +18,7 @@ export const getRazorPayId = createAsyncThunk("/api/v1/payments/keyId", async ()
         console.log(response)
         return response?.data;
     } catch (error) {
-        console.log(error)
+        console.error(error)
         toast.error("Failed to load data");
         throw error
     }
@@ -31,7 +31,7 @@ export const purchaseCourseBundle = createAsyncThunk("/api/v1/payments/subscribe
         console.log(response.data)
         return response?.data;
     } catch (error) {
-        console.log(error)
+        console.error(error)
         toast.error(error?.response?.data?.message);
         throw error
     }

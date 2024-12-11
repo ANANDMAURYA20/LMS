@@ -37,7 +37,7 @@ export default function Contact() {
     setIsLoading(true);
     const loadingMessage = toast.loading("sending message...");
     try {
-      const res = await axiosInstance.post("/contact", userInput);
+      const res = await axiosInstance.post("/api/v1/contact", userInput);
       toast.success(res?.data?.message, { id: loadingMessage });
       setUserInput({
         name: "",

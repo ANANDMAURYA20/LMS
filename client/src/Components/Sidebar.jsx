@@ -86,6 +86,19 @@ export default function Sidebar({ hideBar = false }) {
                 </Link>
               </li>
             )}
+            
+            {role === "ADMIN" && (
+              <li>
+                <Link to="/admin/userdata" className="flex gap-4 items-center">
+                  <FaUserCircle
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  All Users Data
+                </Link>
+              </li>
+            )}
+
 
             {role === "ADMIN" && (
               <li>
@@ -95,6 +108,17 @@ export default function Sidebar({ hideBar = false }) {
                     className="text-gray-500 dark:text-slate-100"
                   />
                   Create new course
+                </Link>
+              </li>
+            )}
+               {role === "ADMIN" && (
+              <li>
+                <Link to="/admin/addblog" className="flex gap-4 items-center">
+                  <FaPlus
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  Add Blogs
                 </Link>
               </li>
             )}
@@ -116,6 +140,15 @@ export default function Sidebar({ hideBar = false }) {
                   className="text-gray-500 dark:text-slate-100"
                 />
                 Contact Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/blog" className="flex gap-4 items-center">
+                <FaPlus
+                  size={18}
+                  className="text-gray-500 dark:text-slate-100"
+                />
+                Our Blog
               </Link>
             </li>
 

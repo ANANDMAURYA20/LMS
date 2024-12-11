@@ -10,24 +10,25 @@ import miscellaneousRoutes from './routes/miscellaneous.routes.js';
 import express from 'express';
 import connectToDb from './config/db.config.js';
 import errorMiddleware from './middleware/error.middleware.js';
+import blogRoutes from './routes/blog.routes.js'
 
 const app = express();
 
-// middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow requests from your frontend origin
-    methods: ['GET', 'POST'], // Specify allowed methods
-    credentials: true, // Allow cookies if needed
+    origin: 'http://localhost:5173', 
+    methods: ['GET', 'POST','DELETE'], 
+    credentials: true, 
 }));
 
 
 app.use('/api/v1/user', userRoutes); 
 app.use('/api/v1/courses', courseRoutes); 
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/', miscellaneousRoutes);
  
 

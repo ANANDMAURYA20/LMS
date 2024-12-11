@@ -23,6 +23,10 @@ import CheckoutFail from "./Pages/Payment/CheckoutFail";
 import DisplayLecture from "./Pages/Dashboard/DisplayLecture";
 import AddLecture from "./Pages/Dashboard/AddLecture";
 import AdminDashboard from "./Pages/Dashboard/AdminDashboard";
+import Userdata from "./Pages/Dashboard/Userdata";
+import Blog from "./Pages/Blog";
+// import BlogAdd from "./Pages/Dashboard/BlogAdd";
+import AddBlog from "./Pages/Dashboard/AddBlog";
 
 function App() {
   return (
@@ -32,6 +36,7 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/denied" element={<Denied />} />
+        <Route path="/blog" element={<Blog />} />
 
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
@@ -51,6 +56,8 @@ function App() {
           <Route path="/course/create" element={<CreateCourse />} />
           <Route path="/course/addlecture" element={<AddLecture />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/userdata" element={<Userdata />} />
+          <Route path="/admin/addblog" element={<AddBlog />} />
         </Route>
 
         <Route element={<RequireAuth allowedRoles={["USER", "ADMIN"]} />}>

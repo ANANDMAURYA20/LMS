@@ -60,6 +60,7 @@ export const getUserData = createAsyncThunk("/auth/user/me", async () => {
     }
 })
 
+
 // .....update user data.........
 export const updateUserData = createAsyncThunk("/api/v1/user/me", async (data) => {
     const loadingMessage = toast.loading("Updating changes...");
@@ -120,6 +121,37 @@ export const resetPassword = createAsyncThunk("/api/v1/user/reset", async (data)
         throw error;
     }
 });
+
+// .......get all users data......
+export const getAllUsers = createAsyncThunk("/api/v1/user/getallusers", async () => {
+    const loadingMessage = toast.loading("Fetching users data...");
+    try {
+        const res = await axiosInstance.get("/api/v1/user/getuser");
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data
+    } catch (error) {
+        toast.error(error?.response?.data?.message, { id: loadingMessage });
+        throw error;
+    }
+});
+
+// .......update user data by admin......
+export const updateUserDataAdmin = createAsyncThunk(
+    "/api/v1/user/updateUserByAdmin",
+    async ({id, formData}) => {
+        const loadingMessage = toast.loading("Updating user data...");
+        try {
+            const res = await axiosInstance.get(`/api/v1/user/updateuser?userId=${id}`, formData);
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } catch (error) {
+            toast.error(error?.response?.data?.message, { id: loadingMessage });
+            throw error;
+        }
+    }
+);
+
+
 
 const authSlice = createSlice({
     name: "auth",

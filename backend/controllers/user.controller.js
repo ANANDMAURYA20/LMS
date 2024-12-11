@@ -268,6 +268,67 @@ const changePassword = async (req, res, next) => {
 
 }
 
+// get all users
+const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await userModel.find().select('-password');
+
+        res.status(200).json({
+            success: true,
+            message: "All registered users",
+            users
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+// update user by admin
+const updateUserByAdmin = async (req, res, next) => {
+    try {
+        const { fullName, role, subscription } = req.body;
+        const { userId } = req.params;
+
+        if (!userId) {
+            return next(new AppError("User ID is required", 400));
+        }
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return next(new AppError("User does not exist", 400));
+        }
+
+        if (fullName) {
+            user.fullName = fullName;
+        }
+
+        if (role) {
+            user.role = role;
+        }
+
+        if (subscription) {
+            user.subscription.status = subscription;
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User details updated successfully",
+            user
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+
+
+
+
+
 // update profile
 const updateUser = async (req, res, next) => {
     try {
@@ -323,6 +384,104 @@ const updateUser = async (req, res, next) => {
     }
 }
 
+
+// Create blog post
+const createBlog = async (req, res, next) => {
+    try {
+        const { title, excerpt, content } = req.body;
+
+        if (!title || !excerpt || !content) {
+            return next(new AppError("All fields are required", 400));
+        }
+
+        let imageUrl = "";
+        let publicId = "";
+
+        if (req.file) {
+            try {
+                const result = await cloudinary.v2.uploader.upload(req.file.path, {
+                    folder: "Learning-Management-System-Blogs",
+                    width: 1000,
+                    height: 600,
+                    crop: "fill"
+                });
+
+                if (result) {
+                    imageUrl = result.secure_url;
+                    publicId = result.public_id;
+                    fs.rmSync(`uploads/${req.file.filename}`);
+                }
+            } catch (e) {
+                return next(new AppError(e.message || 'Image upload failed', 500));
+            }
+        }
+
+        const blog = await blogModel.create({
+            title,
+            excerpt,
+            content,
+            image: {
+                public_id: publicId,
+                secure_url: imageUrl
+            },
+            createdBy: req.user.id
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Blog created successfully",
+            blog
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+// Delete blog post
+const deleteBlog = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const blog = await blogModel.findById(id);
+
+        if (!blog) {
+            return next(new AppError("Blog not found", 404));
+        }
+
+        // Delete image from cloudinary if exists
+        if (blog.image.public_id) {
+            await cloudinary.v2.uploader.destroy(blog.image.public_id);
+        }
+
+        await blog.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: "Blog deleted successfully"
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+// Get all blogs
+const getAllBlogs = async (req, res, next) => {
+    try {
+        const blogs = await blogModel.find().sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            blogs
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+
 export {
     register,
     login,
@@ -331,5 +490,8 @@ export {
     forgotPassword,
     resetPassword,
     changePassword,
-    updateUser
+    updateUser,
+    getAllUsers,
+    updateUserByAdmin
+    
 }

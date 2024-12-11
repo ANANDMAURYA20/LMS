@@ -39,7 +39,7 @@ export default function HomePage() {
         </div>
 
       </section>
-      <section className="md:py-10 py-7 mb-10 text-white flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 md:px-16 px-6 min-h-[85vh]">
+      {/* <section className="md:py-10 py-7 mb-10 text-white flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 md:px-16 px-6 min-h-[85vh]">
         <div className="md:w-1/2 w-full space-y-7">
           <h1 className="md:text-5xl text-6xl font-semibold text-gray-900 dark:text-gray-200">
             <img src={logo} alt="" className="md:h-[100px] h-[65px] md:px-[35px] px-[15px]"/>
@@ -70,7 +70,7 @@ export default function HomePage() {
           <img alt="homepage image" src={heroPng} />
         </div>
 
-      </section>
+      </section> */}
     </Layout>
   );
 }

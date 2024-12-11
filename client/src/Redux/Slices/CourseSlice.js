@@ -40,6 +40,7 @@ export const deleteCourse = createAsyncThunk("/api/v1/courses/delete", async (id
         toast.success("Courses deleted successfully", { id: loadingId });
         return response?.data
     } catch (error) {
+        // console.log(error)
         toast.error("Failed to delete course", { id: loadingId });
         throw error
     }
@@ -54,6 +55,11 @@ const courseSlice = createSlice({
         // for get all courses
         builder.addCase(getAllCourses.fulfilled, (state, action) => {
             state.coursesData = action?.payload?.courses;
+        })
+
+        // for delete course
+        builder.addCase(deleteCourse.fulfilled, (state, action) => {
+            state.coursesData = state.coursesData.filter(course => course.id !== action.payload.id);
         })
     }
 })
