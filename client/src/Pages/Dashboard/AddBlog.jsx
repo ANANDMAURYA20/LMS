@@ -83,7 +83,7 @@ const [blogs, setBlogs] = useState([]);
   const [error, setError] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
-  const URL = BASE_URL+ '/api/v1/blog/all'
+  const URL = BASE_URL+ 'api/v1/blog/all'
 
   useEffect(() => {
     const fetchBlogs = async () => {
