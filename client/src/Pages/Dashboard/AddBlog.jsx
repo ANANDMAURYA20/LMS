@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState,useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { addBlog } from "../../Redux/Slices/BlogSlice"; // Replace with your blog slice
+import { addBlog,deleteBlog } from "../../Redux/Slices/BlogSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import InputBox from "../../Components/InputBox/InputBox";
@@ -17,8 +17,6 @@ export default function AddBlog() {
   const [userInput, setUserInput] = useState({
     title: "",
     description: "",
-    category: "",
-    createdBy: "",
     thumbnail: undefined,
     thumbnailSrc: "",
   });
@@ -44,14 +42,12 @@ export default function AddBlog() {
   async function onFormSubmit(e) {
     e.preventDefault();
     if (
-      !userInput.thumbnail ||
-      !userInput.title ||
-      !userInput.description ||
-      !userInput.category ||
-      !userInput.createdBy
+        !userInput.thumbnail ||
+        !userInput.title ||
+        !userInput.description
     ) {
-      toast.error("All fields are mandatory");
-      return;
+        toast.error("All fields are mandatory");
+        return;
     }
 
     setIsLoading(true);
@@ -60,22 +56,68 @@ export default function AddBlog() {
     formData.append("thumbnail", userInput.thumbnail);
     formData.append("title", userInput.title);
     formData.append("description", userInput.description);
-    formData.append("category", userInput.category);
-    formData.append("createdBy", userInput.createdBy);
 
-    const response = await dispatch(addBlog(formData));
-    if (response?.payload?.success) {
-      navigate("/blogs"); // Redirect to blogs page
-      setUserInput({
-        title: "",
-        description: "",
-        category: "",
-        createdBy: "",
-        thumbnail: undefined,
-        thumbnailSrc: "",
-      });
+    try {
+        const response = await dispatch(addBlog(formData)).unwrap();
+        
+        toast.success("Blog created successfully");
+        navigate(0);
+        
+        // Reset form
+        setUserInput({
+            title: "",
+            description: "",
+            thumbnail: undefined,
+            thumbnailSrc: "",
+        });
+    } catch (error) {
+        console.error("Blog creation error:", error);
+        toast.error(error?.message || "Failed to create blog");
+    } finally {
+        setIsLoading(false);
     }
-    setIsLoading(false);
+}
+
+const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+  const URL = BASE_URL+ '/api/v1/blog/all'
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch(URL);
+        if (!response.ok) {
+          throw new Error('Failed to fetch blogs');
+        }
+        const data = await response.json();
+        setBlogs(data.blogs);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+  async function onBlogDelete(id) {
+    if (window.confirm("Are you sure you want to delete this blog?")) {
+      try {
+        const res = await dispatch(deleteBlog(id));
+        
+        if (res?.payload?.success) {
+          setBlogs(blogs.filter(blog => blog._id !== id));
+          toast.success("Blog deleted successfully");
+       navigate(-1);
+        }
+      } catch (error) {
+        console.error("Failed to delete blog:", error);
+        toast.error("Failed to delete blog");
+      }
+    }
   }
 
   return (
@@ -142,24 +184,6 @@ export default function AddBlog() {
                 onChange={handleInputChange}
                 value={userInput.title}
               />
-              {/* Category */}
-              <InputBox
-                label={"Category"}
-                name={"category"}
-                type={"text"}
-                placeholder={"Enter Blog Category"}
-                onChange={handleInputChange}
-                value={userInput.category}
-              />
-              {/* Created By */}
-              <InputBox
-                label={"Created By"}
-                name={"createdBy"}
-                type={"text"}
-                placeholder={"Enter Author Name"}
-                onChange={handleInputChange}
-                value={userInput.createdBy}
-              />
               {/* Description */}
               <TextArea
                 label={"Description"}
@@ -183,6 +207,43 @@ export default function AddBlog() {
           </button>
         </form>
       </section>
+      <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {blogs.map((blog) => (
+          <div 
+          key={blog._id} 
+            className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
+            {blog.thumbnail && blog.thumbnail.secure_url && (
+              <img 
+                src={blog.thumbnail.secure_url} 
+                alt={blog.title} 
+                className="w-full h-48 object-cover"
+                />
+            )}
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                {blog.title}
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                {blog.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">
+                  Created: {new Date(blog.createdAt).toLocaleDateString()}
+                </span>
+                <button 
+                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
+                  onClick={() => onBlogDelete(blog._id)} 
+                  >
+                  Delet blog
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
     </Layout>
   );
 }

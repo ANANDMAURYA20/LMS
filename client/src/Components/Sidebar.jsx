@@ -11,6 +11,7 @@ import {
   FaList,
   FaInfoCircle,
   FaPhone,
+  FaBlog
 } from "react-icons/fa";
 
 export default function Sidebar({ hideBar = false }) {
@@ -74,6 +75,24 @@ export default function Sidebar({ hideBar = false }) {
                 Home
               </Link>
             </li>
+            <li>
+              <Link to="/blog" className="flex gap-4 items-center">
+                <FaBlog
+                  size={18}
+                  className="text-gray-500 dark:text-slate-100"
+                />
+                Our Blog
+              </Link>
+            </li>
+            <li>
+              <Link to="/courses" className="flex gap-4 items-center">
+                <FaList
+                  size={18}
+                  className="text-gray-500 dark:text-slate-100"
+                />
+                All Courses
+              </Link>
+            </li>
 
             {role === "ADMIN" && (
               <li>
@@ -123,15 +142,7 @@ export default function Sidebar({ hideBar = false }) {
               </li>
             )}
 
-            <li>
-              <Link to="/courses" className="flex gap-4 items-center">
-                <FaList
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                All Courses
-              </Link>
-            </li>
+       
 
             <li>
               <Link to="/contact" className="flex gap-4 items-center">
@@ -142,15 +153,7 @@ export default function Sidebar({ hideBar = false }) {
                 Contact Us
               </Link>
             </li>
-            <li>
-              <Link to="/blog" className="flex gap-4 items-center">
-                <FaPlus
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                Our Blog
-              </Link>
-            </li>
+        
 
             <li>
               <Link to="/about" className="flex gap-4 items-center">

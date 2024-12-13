@@ -1,13 +1,13 @@
-import Blog from "../models/blog.model.js";
-import cloudinary from "cloudinary";
-import fs from "fs/promises";
-import AppError from "../utils/error.utils.js";
+import Blog from '../models/blog.model.js';
+import cloudinary from '../utils/cloudinary.utils.js';
+import fs from 'fs/promises';
+import AppError from '../utils/error.utils.js';
 
-const createBlog = async (req, res, next) => {
+export const createBlog = async (req, res, next) => {
     try {
-        const { title, description, category, createdBy } = req.body;
+        const { title, description } = req.body;
 
-        if (!title || !description || !category || !createdBy) {
+        if (!title || !description) {
             return next(new AppError("All fields are required", 400));
         }
 
@@ -15,34 +15,25 @@ const createBlog = async (req, res, next) => {
             return next(new AppError("Thumbnail image is required", 400));
         }
 
+        // Upload to Cloudinary
+        const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'lms/blogs',
+            resource_type: 'image'
+        });
+
+        // Create blog with Cloudinary details
         const blog = await Blog.create({
             title,
             description,
-            category,
-            createdBy,
+            imageUrl: req.file.path,
             thumbnail: {
-                public_id: "dummy",
-                secure_url: "dummy"
+                public_id: cloudinaryResult.public_id,
+                secure_url: cloudinaryResult.secure_url
             }
         });
 
-        try {
-            const result = await cloudinary.v2.uploader.upload(req.file.path, {
-                folder: 'lms/blogs'
-            });
-
-            if (result) {
-                blog.thumbnail.public_id = result.public_id;
-                blog.thumbnail.secure_url = result.secure_url;
-            }
-
-            fs.rm(`uploads/${req.file.filename}`);
-
-        } catch (error) {
-            return next(new AppError("Error uploading thumbnail, please try again", 500));
-        }
-
-        await blog.save();
+        // Remove local file
+        await fs.unlink(req.file.path);
 
         res.status(201).json({
             success: true,
@@ -51,11 +42,25 @@ const createBlog = async (req, res, next) => {
         });
 
     } catch (error) {
+        // Remove local file in case of error
+        if (req.file) await fs.unlink(req.file.path);
         return next(new AppError(error.message, 500));
     }
 };
 
-const deleteBlog = async (req, res, next) => {
+export const getAllBlogs = async (req, res, next) => {
+    try {
+        const blogs = await Blog.find({}).sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            blogs
+        });
+    } catch (error) {
+        return next(new AppError(error.message, 500));
+    }
+};
+
+export const deleteBlog = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -66,8 +71,9 @@ const deleteBlog = async (req, res, next) => {
         }
 
         // Delete image from cloudinary
-        await cloudinary.v2.uploader.destroy(blog.thumbnail.public_id);
+        await cloudinary.uploader.destroy(blog.thumbnail.public_id);
 
+        // Delete blog from database
         await Blog.findByIdAndDelete(id);
 
         res.status(200).json({
@@ -80,24 +86,20 @@ const deleteBlog = async (req, res, next) => {
     }
 };
 
-const getAllBlogs = async (req, res, next) => {
+export const getBlogById = async (req, res, next) => {
     try {
-        const blogs = await Blog.find({}).sort({ createdAt: -1 });
+        const { id } = req.params;
+        const blog = await Blog.findById(id);
+
+        if (!blog) {
+            return next(new AppError("Blog not found", 404));
+        }
 
         res.status(200).json({
             success: true,
-            message: "All blogs fetched successfully",
-            blogs
+            blog
         });
-
     } catch (error) {
         return next(new AppError(error.message, 500));
     }
-};
-
-
-export {
-    createBlog,
-    deleteBlog,
-    getAllBlogs
 };

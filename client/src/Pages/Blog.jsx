@@ -1,68 +1,98 @@
-import React from 'react'
-import Layout from '../Layout/Layout'
+import React, { useState, useEffect } from 'react';
+import Layout from '../Layout/Layout';
+import { layouts } from 'chart.js';
 
-function Blog() {
+const Blog = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+  const URL = BASE_URL+ '/api/v1/blog/all'
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch(URL);
+        if (!response.ok) {
+          throw new Error('Failed to fetch blogs');
+        }
+        const data = await response.json();
+        setBlogs(data.blogs);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl font-semibold text-gray-600">
+        Loading blogs...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl font-semibold text-red-500">
+        Error: {error}
+      </div>
+    );
+  }
+
   return (
     <Layout>
-      
-    <div>
-    <div className="container mx-auto px-3 py-10 bg-white dark:bg-gray-800">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">Blog</h1>
-      <div className="flex flex-wrap -m-4">
-        <div className="p-4 md:w-1/3">
-          <div className="rounded overflow-hidden shadow-lg bg-white dark:bg-gray-700 m-4">
-            <img className="w-full h-48 object-cover" src="https://picsum.photos/200/300" alt="Blog Image"/>
-            <div className="px-6 py-4">
-              <div className="font-bold text-xl mb-2">The Coldest Sunset</div>
-              <p className="text-gray-700 dark:text-gray-300 text-base">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.
+
+    <div className="container mx-auto px-4 py-8">
+    <h1 className="md:text-4xl text-2xl w-fit text-blue-600 dark:text-white font-inter font-[500] after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600 mb-10">
+          Blogs By {" "}
+          <span className="font-[600] font-lato text-yellow-500">
+            Lyceum
+          </span>
+        </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        {blogs.map((blog) => (
+          <div 
+          key={blog._id} 
+            className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
+            {blog.thumbnail && blog.thumbnail.secure_url && (
+              <img 
+                src={blog.thumbnail.secure_url} 
+                alt={blog.title} 
+                className="w-full h-48 object-cover"
+                />
+            )}
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                {blog.title}
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                {blog.description}
               </p>
-            </div>
-            <div className="px-6 pt-4 pb-2 flex items-center justify-between">
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#photography</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#travel</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">#winter</span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">
+                  Created: {new Date(blog.createdAt).toLocaleDateString()}
+                </span>
+                <button 
+                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
+                  >
+                  Read More
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="p-4 md:w-1/3">
-          <div className="rounded overflow-hidden shadow-lg bg-white dark:bg-gray-700 m-4">
-            <img className="w-full h-48 object-cover" src="https://picsum.photos/200/301" alt="Blog Image"/>
-            <div className="px-6 py-4">
-              <div className="font-bold text-xl mb-2">The Coldest Sunset</div>
-              <p className="text-gray-700 dark:text-gray-300 text-base">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.
-              </p>
-            </div>
-            <div className="px-6 pt-4 pb-2 flex items-center justify-between">
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#photography</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#travel</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">#winter</span>
-            </div>
-          </div>
-        </div>
-        <div className="p-4 md:w-1/3">
-          <div className="rounded overflow-hidden shadow-lg bg-white dark:bg-gray-700 m-4">
-            <img className="w-full h-48 object-cover" src="https://picsum.photos/200/302" alt="Blog Image"/>
-            <div className="px-6 py-4">
-              <div className="font-bold text-xl mb-2">The Coldest Sunset</div>
-              <p className="text-gray-700 dark:text-gray-300 text-base">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.
-              </p>
-            </div>
-            <div className="px-6 pt-4 pb-2 flex items-center justify-between">
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#photography</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">#travel</span>
-              <span className="inline-block bg-gray-200 dark:bg-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">#winter</span>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
-    </div>
-    </Layout>
+</Layout>
+  );
+};
 
-  )
-}
-
-export default Blog
+export default Blog;
