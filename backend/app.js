@@ -14,12 +14,15 @@ import blogRoutes from './routes/blog.routes.js'
 
 const app = express();
 
+const CLIENT_URLS = process.env.CLIENT_URL
+console.log(CLIENT_URLS)
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: CLIENT_URLS,
     methods: ['GET', 'POST','DELETE'], 
     credentials: true, 
 }));
