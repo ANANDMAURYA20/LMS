@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Increase the chunk size warning limit (in kibibytes)
     chunkSizeWarningLimit: 1000, // Default is usually around 500
+     outDir: 'dist'
   }
 })
