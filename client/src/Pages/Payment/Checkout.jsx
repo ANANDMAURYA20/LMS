@@ -26,51 +26,18 @@ export default function Checkout() {
     razorpay_payment_id: "",
     razorpay_signature: "",
     razorpay_subscription_id: subscription_id,
-    
   };
 
   async function handleSubscription(e) {
     e.preventDefault();
+    // console.log(subscription_id);
     if (!rzorpayKey) {
-      console.log(subscription_id)
-      console.log(rzorpayKey)
+      // console.log(subscription_id);
+      // console.log(rzorpayKey);
       console.error("Missing RazorPay key or subscription ID");
       toast.error("Something went wrong");
       return;
     }
-
-    const options = {
-      key: rzorpayKey,
-      subscription_id: subscription_id,
-      name: "Lyceum Pvt. LTD",
-      description: "subscription",
-      amount: 49900, 
-      theme: {
-        color: "#fff",
-      },
-      prefill: {
-        
-        email: userData?.email,
-        name: userData?.fullName,
-      },
-      handler: async function (response) {
-        paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
-        paymentDetails.razorpay_signature = response.razorpay_signature;
-        paymentDetails.razorpay_subscription_id =
-          response.razorpay_subscription_id;
-
-        toast.success("Payment successful");
-
-        const res = await dispatch(verifyUserPayment(paymentDetails));
-        if (res?.payload?.success) {
-          navigate("/checkout/success");
-        } else {
-          navigate("/checkout/fail");
-        }
-      },
-    };
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
   }
 
   useEffect(() => {

@@ -65,6 +65,7 @@ export const verifySubscription = async (req, res, next) => {
         }
 
         const subscriptionId = user.subscription.id;
+        console.log(subscriptionId)
 
         const generatedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_SECRET)

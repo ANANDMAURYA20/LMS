@@ -42,6 +42,7 @@ export const verifyUserPayment = createAsyncThunk("/api/v1/payments/verify", asy
     const loadingId = toast.loading("Subscribing bundle...");
     try {
         const response = await axiosInstance.post("/api/v1/payments/verify", data);
+    console.log(response)
         toast.success("Payment verified", { id: loadingId });
         return response?.data;
     } catch (error) {
