@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="py-12 md:px-16 px-3 bg-slate-100 dark:bg-gray-900 flex md:flex-row flex-col md:justify-between justify-center items-center gap-4">
       <span className="md:text-xl  text-lg font-[600] text-gray-700 dark:text-white">
-        Copyright {year} | All Right Reserved
+        Copyright {year} | All Right Reserved <a href="https://sharmaabhi7.github.io/portfolio/#">Abhishek Sharma</a>
       </span>
       <div className="flex gap-5 items-center">
         <a
@@ -23,7 +23,7 @@ export default function Footer() {
           <BsInstagram />
         </a>
         <a
-          href="#"
+          href="https://www.linkedin.com/in/abhishek-sharma-46b635295/"
           className="md:text-3xl text-xl text-gray-900 dark:text-slate-50 hover:text-gray-500 dark:hover:text-slate-300"
         >
           <BsLinkedin />
