@@ -25,6 +25,12 @@ const userSchema = new Schema({
         minLength: [4, 'Password must be at least 4 character'],
         select: false
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: String,
+    emailVerificationExpiry: Date,
     avatar: {
         public_id: {
             type: String
@@ -78,8 +84,21 @@ userSchema.methods = {
         this.forgotPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 min from now
 
         return resetToken;
-    }
+    },
 
+    generateEmailVerificationToken : async function () {
+        const verificationToken = crypto.randomBytes(20).toString('hex');
+    
+        this.emailVerificationToken = crypto
+            .createHash('sha256')
+            .update(verificationToken)
+            .digest('hex');
+    
+        this.emailVerificationExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+    
+        return verificationToken;
+
+}
 }
 
 

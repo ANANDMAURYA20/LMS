@@ -21,6 +21,36 @@ export const createAccount = createAsyncThunk("/api/v1/user/register", async (da
     }
 })
 
+export const verifyEmail = createAsyncThunk(
+    "/api/v1/user/verify-email",
+    async (token) => {
+        const loadingMessage = toast.loading("Verifying email...");
+        try {
+            const res = await axiosInstance.post(`/api/v1/user/verify-email/${token}`);
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } catch (error) {
+            toast.error(error?.response?.data?.message, { id: loadingMessage });
+            throw error;
+        }
+    }
+);
+
+export const resendVerificationEmail = createAsyncThunk(
+    "/api/v1/user/resend-verification",
+    async (email) => {
+        const loadingMessage = toast.loading("Sending verification email...");
+        try {
+            const res = await axiosInstance.post("/api/v1/user/resend-verification", { email });
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } catch (error) {
+            toast.error(error?.response?.data?.message, { id: loadingMessage });
+            throw error;
+        }
+    }
+);
+
 // .....Login.........
 export const login = createAsyncThunk("/api/v1/user/login", async (data) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
@@ -142,6 +172,7 @@ export const updateUserDataAdmin = createAsyncThunk(
         const loadingMessage = toast.loading("Updating user data...");
         try {
             const res = await axiosInstance.get(`/api/v1/user/updateuser?userId=${id}`, formData);
+            console.log(res)
             toast.success(res?.data?.message, { id: loadingMessage });
             return res?.data;
         } catch (error) {

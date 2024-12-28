@@ -13,6 +13,8 @@ import CourseList from "./Pages/Course/CourseList";
 import Contact from "./Pages/Contact";
 import Denied from "./Pages/Denied";
 import CourseDescription from "./Pages/Course/CourseDescription";
+import EmailVerification from "./Pages/EmailVerification";
+import ResendVerification from "./Pages/ResendVerification";
 
 import RequireAuth from "./Components/auth/RequireAuth";
 import CreateCourse from "./Pages/Course/CreateCourse";
@@ -37,8 +39,10 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/denied" element={<Denied />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/verify-email/:token" element={<EmailVerification />} />
+       <Route path="/resend-verification" element={<ResendVerification />} />
 
-        <Route path="/signup" element={<Signup />} />
+          <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/user/profile/reset-password"

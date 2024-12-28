@@ -18,6 +18,8 @@ const cookieOptions = {
 // Register  
 const register = async (req, res, next) => {
     try {
+
+        
         const { fullName, email, password } = req.body;
 
         // Check if user misses any fields
@@ -42,9 +44,28 @@ const register = async (req, res, next) => {
             },
         });
 
+        const verificationToken = await user.generateEmailVerificationToken();
+        await user.save();
+
+        const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+        const subject = 'Email Verification';
+        const message = `Please verify your email by clicking on this link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`;
+        
+        await sendEmail(email, subject, message);
+
+        res.status(201).json({
+            success: true,
+            message: "Registration successful. Please check your email to verify your account.",
+            user
+        });
+
         if (!user) {
             return next(new AppError("User registration failed, please try again", 400));
         }
+
+        
+
+        
 
         // File upload
         if (req.file) {
@@ -64,7 +85,9 @@ const register = async (req, res, next) => {
                     // Remove the file from the server
                     fs.rmSync(`uploads/${req.file.filename}`);
                 }
-            } catch (e) {
+            } 
+            
+            catch (e) {
                 return next(new AppError(e.message || "File not uploaded, please try again", 500));
             }
         }
@@ -82,24 +105,98 @@ const register = async (req, res, next) => {
             message: "User registered successfully",
             user,
         });
+    } 
+    
+    catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+
+
+};
+
+const verifyEmail = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+
+        // Hash token
+        const emailVerificationToken = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
+
+        // Find user with token and valid expiry
+        const user = await userModel.findOne({
+            emailVerificationToken,
+            emailVerificationExpiry: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return next(new AppError('Invalid or expired verification token', 400));
+        }
+
+        // Update user
+        user.isEmailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpiry = undefined;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Email verified successfully'
+        });
     } catch (e) {
         return next(new AppError(e.message, 500));
     }
 };
 
+// Resend verification email
+const resendVerificationEmail = async (req, res, next) => {
+    try {
+        const { email } = req.body;
 
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return next(new AppError('User not found', 404));
+        }
+
+        if (user.isEmailVerified) {
+            return next(new AppError('Email already verified', 400));
+        }
+
+        const verificationToken = await user.generateEmailVerificationToken();
+        await user.save();
+
+        const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+
+        const subject = 'Email Verification';
+        const message = `Please verify your email by clicking on this link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`;
+        
+        await sendEmail(email, subject, message);
+
+        res.status(200).json({
+            success: true,
+            message: 'Verification email resent successfully'
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+};
 
 // login
 const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-
+        
         // check if user miss any field
         if (!email || !password) {
             return next(new AppError('All fields are required', 400))
         }
-
+        
         const user = await userModel.findOne({ email }).select('+password');
+        if (!user.isEmailVerified) {
+            return next(new AppError('Please verify your email before logging in', 400));
+        }
 
         if (!user || !(bcrypt.compareSync(password, user.password))) {
             return next(new AppError('Email or Password does not match', 400))
@@ -492,6 +589,8 @@ export {
     changePassword,
     updateUser,
     getAllUsers,
-    updateUserByAdmin
+    updateUserByAdmin,
+    resendVerificationEmail,
+    verifyEmail,
     
 }

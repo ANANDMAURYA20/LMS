@@ -81,8 +81,8 @@ export default function Signup() {
         avatar: "",
       });
       setPreviewImage("");
-
-      navigate("/");
+      
+      navigate("/login");
     }
   }
 
