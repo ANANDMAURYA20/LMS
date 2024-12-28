@@ -29,22 +29,6 @@ const Blog = () => {
     fetchBlogs();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-xl font-semibold text-gray-600">
-        Loading blogs...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen text-xl font-semibold text-red-500">
-        Error: {error}
-      </div>
-    );
-  }
-
   return (
     <Layout>
 
