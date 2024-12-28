@@ -178,6 +178,15 @@ export default function Profile() {
               className="md:w-[48%] w-[100%]"
               disabled={true}
             />
+            {/* number */}
+            <InputBox
+              label={"Number"}
+              name={"number"}
+              type={"string"}
+              value={userData?.number || ""}
+              className="md:w-[48%] w-[100%]"
+              disabled={true}
+            />
             {/* role */}
             <InputBox
               label={"Role"}

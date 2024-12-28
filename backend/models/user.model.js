@@ -25,6 +25,13 @@ const userSchema = new Schema({
         minLength: [4, 'Password must be at least 4 character'],
         select: false
     },
+    number: {
+        type: String,
+        required: [true, 'Number is required'],
+        minLength: [10, 'Number must be at least 10 character'],
+        maxLength: [10, 'Number should be less than 10 character'],
+        trim: true
+    },  
     isEmailVerified: {
         type: Boolean,
         default: false

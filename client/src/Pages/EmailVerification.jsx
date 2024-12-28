@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { verifyEmail } from '../Redux/Slices/AuthSlice';
+import Layout from '../Layout/Layout';
 
 const EmailVerification = () => {
     const { token } = useParams();
@@ -26,6 +27,8 @@ const EmailVerification = () => {
     }, [token, dispatch, navigate]);
 
     return (
+        <Layout>
+
         <div className="min-h-screen flex items-center justify-center">
             <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
                 {verificationStatus === 'verifying' && (
@@ -56,6 +59,7 @@ const EmailVerification = () => {
                 )}
             </div>
         </div>
+     </Layout>
     );
 };
 

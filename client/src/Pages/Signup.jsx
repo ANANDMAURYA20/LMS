@@ -18,6 +18,7 @@ export default function Signup() {
     fullName: "",
     email: "",
     password: "",
+    number: "",
     avatar: "",
   });
 
@@ -49,7 +50,7 @@ export default function Signup() {
 
   async function createNewAccount(event) {
     event.preventDefault();
-    if (!signupData.email || !signupData.password || !signupData.fullName) {
+    if (!signupData.email || !signupData.password || !signupData.fullName || !signupData.number) {
       toast.error("Please fill all the details");
       return;
     }
@@ -69,6 +70,7 @@ export default function Signup() {
     formData.append("fullName", signupData.fullName);
     formData.append("email", signupData.email);
     formData.append("password", signupData.password);
+    formData.append("number", signupData.number);
     formData.append("avatar", signupData.avatar);
 
     // dispatch create account action
@@ -78,6 +80,7 @@ export default function Signup() {
         fullName: "",
         email: "",
         password: "",
+        number: "",
         avatar: "",
       });
       setPreviewImage("");
@@ -107,6 +110,16 @@ export default function Signup() {
             onChange={handleUserInput}
             value={signupData.fullName}
           />
+          {/* number */}
+             <InputBox
+            label={"Number"}
+            name={"number"}
+            type={"text"}
+            placeholder={"Enter your number..."}
+            onChange={handleUserInput}
+            value={signupData.number}
+          />
+          
           {/* email */}
           <InputBox
             label={"Email"}

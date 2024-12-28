@@ -20,10 +20,10 @@ const register = async (req, res, next) => {
     try {
 
         
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password,number } = req.body;
 
         // Check if user misses any fields
-        if (!fullName || !email || !password) {
+        if (!fullName || !email || !password || !number) {
             return next(new AppError("All fields are required", 400));
         }
 
@@ -38,6 +38,7 @@ const register = async (req, res, next) => {
             fullName,
             email,
             password,
+            number,
             avatar: {
                 public_id: email,
                 secure_url: "",
