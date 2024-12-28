@@ -17,6 +17,7 @@ export default function AddBlog() {
   const [userInput, setUserInput] = useState({
     title: "",
     description: "",
+    link:"",
     thumbnail: undefined,
     thumbnailSrc: "",
   });
@@ -44,6 +45,7 @@ export default function AddBlog() {
     if (
         !userInput.thumbnail ||
         !userInput.title ||
+        !userInput.link ||
         !userInput.description
     ) {
         toast.error("All fields are mandatory");
@@ -55,6 +57,7 @@ export default function AddBlog() {
     const formData = new FormData();
     formData.append("thumbnail", userInput.thumbnail);
     formData.append("title", userInput.title);
+    formData.append("link", userInput.link);
     formData.append("description", userInput.description);
 
     try {
@@ -67,6 +70,7 @@ export default function AddBlog() {
         setUserInput({
             title: "",
             description: "",
+            link:"",
             thumbnail: undefined,
             thumbnailSrc: "",
         });
@@ -183,6 +187,15 @@ const [blogs, setBlogs] = useState([]);
                 placeholder={"Enter Blog Title"}
                 onChange={handleInputChange}
                 value={userInput.title}
+              />
+              {/* Link */}
+              <InputBox
+                label={"Link"}
+                name={"link"}
+                type={"text"}
+                placeholder={"Enter Blog Link"}
+                onChange={handleInputChange}
+                value={userInput.link}
               />
               {/* Description */}
               <TextArea

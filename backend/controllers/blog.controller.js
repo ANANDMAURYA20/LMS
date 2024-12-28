@@ -5,9 +5,9 @@ import AppError from '../utils/error.utils.js';
 
 export const createBlog = async (req, res, next) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, link } = req.body;
 
-        if (!title || !description) {
+        if (!title || !description || !link) {
             return next(new AppError("All fields are required", 400));
         }
 
@@ -25,6 +25,7 @@ export const createBlog = async (req, res, next) => {
         const blog = await Blog.create({
             title,
             description,
+            link,
             imageUrl: req.file.path,
             thumbnail: {
                 public_id: cloudinaryResult.public_id,

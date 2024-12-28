@@ -64,11 +64,13 @@ const Blog = () => {
                 <span className="text-xs text-gray-500">
                   Created: {new Date(blog.createdAt).toLocaleDateString()}
                 </span>
+                <a href={blog.link} target="_blank" rel="noreferrer noopener">
                 <button 
                   className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
                   >
                   Read More
                 </button>
+                </a>
               </div>
             </div>
           </div>
