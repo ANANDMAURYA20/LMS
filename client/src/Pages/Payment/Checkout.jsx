@@ -30,7 +30,7 @@ export default function Checkout() {
 
   async function handleSubscription(e) {
     e.preventDefault();
-    if (!rzorpayKey ) {
+    if (!rzorpayKey  ) {
       console.log(rzorpayKey);
       console.error("Missing RazorPay key or subscription ID");
       toast.error("Something went wrong");
