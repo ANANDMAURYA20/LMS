@@ -165,18 +165,43 @@ export const getAllUsers = createAsyncThunk("/api/v1/user/getallusers", async ()
     }
 });
 
+export const getUserById = createAsyncThunk('/api/v1/user/getUserById',async (userId) => {
+    const loadingMessage = toast.loading("Fetching user data...");
+    try {
+        const response = await axiosInstance.get(`/api/v1/user/getUserById/${userId}`);
+        toast.success(response?.data?.message, { id: loadingMessage });
+        return response.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message, { id: loadingMessage });
+        throw error;
+    }
+});
+  
+
+
+
 // .......update user data by admin......
 export const updateUserDataAdmin = createAsyncThunk(
     "/api/v1/user/updateUserByAdmin",
     async ({id, formData}) => {
         const loadingMessage = toast.loading("Updating user data...");
         try {
-            const res = await axiosInstance.get(`/api/v1/user/updateuser?userId=${id}`, formData);
-            console.log(res)
+            // console.log('Making API call with:', {
+            //     id,
+            //     formData
+            // });
+            
+            const res = await axiosInstance.post(`/api/v1/user/updateuser/${id}`, formData);
+            // console.log("Full API Response:", res);
             toast.success(res?.data?.message, { id: loadingMessage });
             return res?.data;
         } catch (error) {
-            toast.error(error?.response?.data?.message, { id: loadingMessage });
+            console.error("Full error details:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
+            toast.error(error?.response?.data?.message || "Failed to update user", { id: loadingMessage });
             throw error;
         }
     }

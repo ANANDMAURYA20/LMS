@@ -26,6 +26,8 @@ import DisplayLecture from "./Pages/Dashboard/DisplayLecture";
 import AddLecture from "./Pages/Dashboard/AddLecture";
 import AdminDashboard from "./Pages/Dashboard/AdminDashboard";
 import Userdata from "./Pages/Dashboard/Userdata";
+import AdminUserEdit from "./Pages/Dashboard/AdminUserEdit"; 
+
 import Blog from "./Pages/Blog";
 // import BlogAdd from "./Pages/Dashboard/BlogAdd";
 import AddBlog from "./Pages/Dashboard/AddBlog";
@@ -62,6 +64,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/userdata" element={<Userdata />} />
           <Route path="/admin/addblog" element={<AddBlog />} />
+          <Route path="/admin/users/:userId/edit" element={<AdminUserEdit />} />
         </Route>
 
         <Route element={<RequireAuth allowedRoles={["USER", "ADMIN"]} />}>

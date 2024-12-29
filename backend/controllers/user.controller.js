@@ -391,39 +391,59 @@ const updateUserByAdmin = async (req, res, next) => {
             return next(new AppError("User ID is required", 400));
         }
 
-        const user = await userModel.findById(userId);
+        // Using findByIdAndUpdate instead of find + save
+        // This avoids triggering full model validation
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    ...(fullName && { fullName }),
+                    ...(role && { role }),
+                    ...(subscription?.status && { 'subscription.status': subscription.status })
+                }
+            },
+            { 
+                new: true, // Return updated document
+                runValidators: false // Don't run model validations
+            }
+        );
 
-        if (!user) {
+        if (!updatedUser) {
             return next(new AppError("User does not exist", 400));
         }
-
-        if (fullName) {
-            user.fullName = fullName;
-        }
-
-        if (role) {
-            user.role = role;
-        }
-
-        if (subscription) {
-            user.subscription.status = subscription;
-        }
-
-        await user.save();
 
         res.status(200).json({
             success: true,
             message: "User details updated successfully",
-            user
+            user: updatedUser
         });
 
     } catch (e) {
+        console.error('Server error:', e);
         return next(new AppError(e.message, 500));
     }
 }
 
 
+const getUserById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
 
+        const user = await userModel.findById(id).select('-password');
+
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User details",
+            user
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
 
 
 
@@ -483,101 +503,7 @@ const updateUser = async (req, res, next) => {
 }
 
 
-// Create blog post
-const createBlog = async (req, res, next) => {
-    try {
-        const { title, excerpt, content } = req.body;
 
-        if (!title || !excerpt || !content) {
-            return next(new AppError("All fields are required", 400));
-        }
-
-        let imageUrl = "";
-        let publicId = "";
-
-        if (req.file) {
-            try {
-                const result = await cloudinary.v2.uploader.upload(req.file.path, {
-                    folder: "Learning-Management-System-Blogs",
-                    width: 1000,
-                    height: 600,
-                    crop: "fill"
-                });
-
-                if (result) {
-                    imageUrl = result.secure_url;
-                    publicId = result.public_id;
-                    fs.rmSync(`uploads/${req.file.filename}`);
-                }
-            } catch (e) {
-                return next(new AppError(e.message || 'Image upload failed', 500));
-            }
-        }
-
-        const blog = await blogModel.create({
-            title,
-            excerpt,
-            content,
-            image: {
-                public_id: publicId,
-                secure_url: imageUrl
-            },
-            createdBy: req.user.id
-        });
-
-        res.status(201).json({
-            success: true,
-            message: "Blog created successfully",
-            blog
-        });
-
-    } catch (e) {
-        return next(new AppError(e.message, 500));
-    }
-}
-
-// Delete blog post
-const deleteBlog = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const blog = await blogModel.findById(id);
-
-        if (!blog) {
-            return next(new AppError("Blog not found", 404));
-        }
-
-        // Delete image from cloudinary if exists
-        if (blog.image.public_id) {
-            await cloudinary.v2.uploader.destroy(blog.image.public_id);
-        }
-
-        await blog.deleteOne();
-
-        res.status(200).json({
-            success: true,
-            message: "Blog deleted successfully"
-        });
-
-    } catch (e) {
-        return next(new AppError(e.message, 500));
-    }
-}
-
-// Get all blogs
-const getAllBlogs = async (req, res, next) => {
-    try {
-        const blogs = await blogModel.find().sort({ createdAt: -1 });
-
-        res.status(200).json({
-            success: true,
-            blogs
-        });
-
-    } catch (e) {
-        return next(new AppError(e.message, 500));
-    }
-}
 
 
 export {
@@ -593,5 +519,6 @@ export {
     updateUserByAdmin,
     resendVerificationEmail,
     verifyEmail,
+    getUserById,
     
 }
