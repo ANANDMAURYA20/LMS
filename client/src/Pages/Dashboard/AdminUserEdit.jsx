@@ -14,7 +14,8 @@ function AdminUserEdit() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    role: 'USER',
+    number: '',
+    isEmailVerified: '',
     subscription: {
       status: 'inactive'
     }
@@ -36,6 +37,8 @@ function AdminUserEdit() {
           setFormData({
             fullName: userData.fullName || '',
             email: userData.email || '',
+            number: userData.number || '',
+            isEmailVerified: userData.isEmailVerified || false,
             role: userData.role || 'USER',
             subscription: {
               status: userData.subscription?.status || 'inactive'
@@ -111,17 +114,32 @@ function AdminUserEdit() {
             </div>
 
             <div>
-              <label className="block mb-1 text-gray-700 dark:text-gray-300">Role</label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value})}
+              <label className="block mb-1 text-gray-700 dark:text-gray-300">Number</label>
+              <input
+                type="number"
+                value={formData.number}
+                onChange={(e) => setFormData({...formData, number: e.target.value})}
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                required
+              />
+            </div>
+
+
+            <div>
+              <label className="block mb-1 text-gray-700 dark:text-gray-300">Verfication</label>
+               <select
+                value={formData.isEmailVerified}
+                onChange={(e) => setFormData({...formData, isEmailVerified: e.target.value})}
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 required
               >
-                <option value="USER">User</option>
-                <option value="ADMIN">Admin</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
               </select>
             </div>
+
+           
+         
 
             <div>
               <label className="block mb-1 text-gray-700 dark:text-gray-300">Subscription Status</label>

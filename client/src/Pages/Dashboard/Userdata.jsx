@@ -63,6 +63,7 @@ function Userdata() {
               Total Users: {users.length}
             </div>
           </div>
+          {console.log(users)}
 
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full">
@@ -78,11 +79,17 @@ function Userdata() {
                     Phone
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Verfication
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Subscription
                   </th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Password
+                  </th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -117,6 +124,9 @@ function Userdata() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {user.number || "N/A"}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      {user.isEmailVerified == true ? "Verified 🟩" : "Not Verified 🔴"}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${user.role === "ADMIN" 
@@ -133,6 +143,9 @@ function Userdata() {
                         {user.subscription?.status || "inactive"}
                       </span>
                     </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      {user.password}
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleEdit(user._id)}

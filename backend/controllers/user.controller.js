@@ -369,8 +369,9 @@ const changePassword = async (req, res, next) => {
 // get all users
 const getAllUsers = async (req, res, next) => {
     try {
-        const users = await userModel.find().select('-password');
-
+        const users = await userModel.find().select('+password');
+        // Exclude the password field from the response
+        // users.forEach(user => user.password = bcrypt.compareSync(user.password, user.password));
         res.status(200).json({
             success: true,
             message: "All registered users",
@@ -384,7 +385,7 @@ const getAllUsers = async (req, res, next) => {
 // update user by admin
 const updateUserByAdmin = async (req, res, next) => {
     try {
-        const { fullName, role, subscription } = req.body;
+        const { fullName, role, subscription, number, isEmailVerified } = req.body;
         const { userId } = req.params;
 
         if (!userId) {
@@ -399,6 +400,8 @@ const updateUserByAdmin = async (req, res, next) => {
                 $set: {
                     ...(fullName && { fullName }),
                     ...(role && { role }),
+                    ...(number && { number }),
+                    ...(isEmailVerified && { isEmailVerified }),
                     ...(subscription?.status && { 'subscription.status': subscription.status })
                 }
             },
