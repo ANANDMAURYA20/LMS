@@ -7,21 +7,24 @@ import InputBox from "../../Components/InputBox/InputBox";
 import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import { FiUpload } from "react-icons/fi";
 
 export default function AddLecture() {
   const courseDetails = useLocation().state;
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
+  const pdfRef = useRef(null);
   const [userInput, setUserInput] = useState({
     id: courseDetails?._id,
     lecture: undefined,
     title: "",
     description: "",
     videoSrc: "",
+    pdf: undefined,
+    pdfName: ""
   });
 
   function handleInputChange(e) {
@@ -42,6 +45,19 @@ export default function AddLecture() {
     });
   }
 
+  function handlePDF(e) {
+    const pdf = e.target.files[0];
+    if (pdf.type !== "application/pdf") {
+      toast.error("Please upload PDF files only");
+      return;
+    }
+    setUserInput({
+      ...userInput,
+      pdf: pdf,
+      pdfName: pdf.name
+    });
+  }
+
   async function onFormSubmit(e) {
     e.preventDefault();
     if (!userInput.lecture || !userInput.title || !userInput.description) {
@@ -55,6 +71,9 @@ export default function AddLecture() {
     formData.append("lecture", userInput.lecture);
     formData.append("title", userInput.title);
     formData.append("description", userInput.description);
+    if (userInput.pdf) {
+      formData.append("pdf", userInput.pdf);
+    }
 
     const data = { formData, id: userInput.id };
 
@@ -67,6 +86,8 @@ export default function AddLecture() {
         title: "",
         description: "",
         videoSrc: "",
+        pdf: undefined,
+        pdfName: ""
       });
     }
     setIsLoading(false);
@@ -83,7 +104,7 @@ export default function AddLecture() {
           onSubmit={onFormSubmit}
           autoComplete="off"
           noValidate
-          className="flex flex-col dark:bg-base-100 gap-7 rounded-lg md:py-5 py-7 md:px-7 px-3 md:w-[750px] w-full shadow-custom dark:shadow-xl  "
+          className="flex flex-col dark:bg-base-100 gap-7 rounded-lg md:py-5 py-7 md:px-7 px-3 md:w-[750px] w-full shadow-custom dark:shadow-xl"
         >
           <header className="flex items-center justify-center relative">
             <button
@@ -100,7 +121,7 @@ export default function AddLecture() {
             <div className="md:w-[48%] w-full flex flex-col gap-5">
               {/* lecture video */}
               <div className="border border-gray-300 h-[200px] flex justify-center cursor-pointer">
-                {userInput.videoSrc && (
+                {userInput.videoSrc ? (
                   <video
                     muted
                     src={userInput.videoSrc}
@@ -108,13 +129,9 @@ export default function AddLecture() {
                     controlsList="nodownload nofullscreen"
                     disablePictureInPicture
                     className="object-fill w-full"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      videoRef.current.click();
-                    }}
+                    onClick={() => videoRef.current.click()}
                   ></video>
-                )}
-                {!userInput.videoSrc && (
+                ) : (
                   <label
                     className="font-[500] text-xl h-full w-full flex justify-center items-center cursor-pointer font-lato"
                     htmlFor="lecture"
@@ -130,6 +147,26 @@ export default function AddLecture() {
                   name="lecture"
                   onChange={handleVideo}
                   accept="video/mp4, video/x-mp4, video/*"
+                />
+              </div>
+
+              {/* PDF upload */}
+              <div 
+                className="border border-gray-300 p-4 rounded-md cursor-pointer hover:bg-gray-50"
+                onClick={() => pdfRef.current.click()}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <FiUpload className="text-2xl text-gray-600" />
+                  <span className="font-medium">
+                    {userInput.pdfName || "Upload PDF Materials (Optional)"}
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={pdfRef}
+                  onChange={handlePDF}
+                  accept=".pdf"
                 />
               </div>
             </div>
@@ -160,7 +197,7 @@ export default function AddLecture() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-3 bg-yellow-500 text-white dark:text-base-200  transition-all ease-in-out duration-300 rounded-md py-2 font-nunito-sans font-[500]  text-lg cursor-pointer"
+            className="mt-3 bg-yellow-500 text-white dark:text-base-200 transition-all ease-in-out duration-300 rounded-md py-2 font-nunito-sans font-[500] text-lg cursor-pointer"
           >
             {isLoading ? "Adding Lecture..." : "Add New Lecture"}
           </button>

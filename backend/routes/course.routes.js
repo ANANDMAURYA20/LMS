@@ -14,6 +14,9 @@ router.route('/:id')
     .get(isLoggedIn, authorizeSubscriber, getLecturesByCourseId)
     .put(isLoggedIn, authorisedRoles("ADMIN"), upload.single("thumbnail"), updateCourse)
     .delete(isLoggedIn, authorisedRoles('ADMIN'), removeCourse)
-    .post(isLoggedIn, authorisedRoles("ADMIN"), upload.single("lecture"), addLectureToCourseById);
+    router.post('/:id', upload.fields([
+        { name: 'lecture', maxCount: 1 },
+        { name: 'pdf', maxCount: 1 }
+    ]), addLectureToCourseById);
 
 export default router

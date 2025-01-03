@@ -38,6 +38,14 @@ const courseSchema = new Schema({
                 secure_url: {
                     type: String
                 }
+            },
+            materials: {
+                public_id: {
+                    type: String
+                },
+                secure_url: {
+                    type: String
+                }
             }
         }
     ],

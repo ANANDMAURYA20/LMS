@@ -157,6 +157,60 @@ const removeCourse = async (req, res, next) => {
 }
 
 // add lecture to course by id
+// const addLectureToCourseById = async (req, res, next) => {
+//     try {
+//         const { title, description } = req.body;
+//         const { id } = req.params;
+
+//         if (!title || !description) {
+//             return next(new AppError('all fields are required', 500));
+//         }
+
+//         const course = await courseModel.findById(id);
+
+//         if (!course) {
+//             return next(new AppError('course with given id does not exist', 500));
+//         }
+
+//         const lectureData = {
+//             title,
+//             description,
+//             lecture: {}
+//         }
+
+//         // file upload
+//         if (req.file) {
+//             try {
+//                 const result = await cloudinary.v2.uploader.upload(req.file.path, {
+//                     folder: 'Learning-Management-System',
+//                     resource_type: "video"
+//                 });
+//                 if (result) {
+//                     lectureData.lecture.public_id = result.public_id;
+//                     lectureData.lecture.secure_url = result.secure_url;
+//                 }
+
+//                 fs.rmSync(`uploads/${req.file.filename}`);
+//             } catch (e) {
+//                  return next(new AppError(e.message, 500));
+//             }
+//         }
+
+//         course.lectures.push(lectureData);
+//         course.numberOfLectures = course.lectures.length;
+
+//         await course.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'lecture added successfully'
+//         })
+
+//     } catch (e) {
+//          return next(new AppError(e.message, 500));
+//     }
+// }
+
 const addLectureToCourseById = async (req, res, next) => {
     try {
         const { title, description } = req.body;
@@ -175,13 +229,14 @@ const addLectureToCourseById = async (req, res, next) => {
         const lectureData = {
             title,
             description,
-            lecture: {}
+            lecture: {},
+            materials: {}
         }
 
-        // file upload
-        if (req.file) {
+        // Video upload
+        if (req.files && req.files.lecture) {
             try {
-                const result = await cloudinary.v2.uploader.upload(req.file.path, {
+                const result = await cloudinary.v2.uploader.upload(req.files.lecture[0].path, {
                     folder: 'Learning-Management-System',
                     resource_type: "video"
                 });
@@ -190,9 +245,27 @@ const addLectureToCourseById = async (req, res, next) => {
                     lectureData.lecture.secure_url = result.secure_url;
                 }
 
-                fs.rmSync(`uploads/${req.file.filename}`);
+                fs.rmSync(`uploads/${req.files.lecture[0].filename}`);
             } catch (e) {
-                 return next(new AppError(e.message, 500));
+                return next(new AppError(e.message, 500));
+            }
+        }
+
+        // PDF upload
+        if (req.files && req.files.pdf) {
+            try {
+                const result = await cloudinary.v2.uploader.upload(req.files.pdf[0].path, {
+                    folder: 'Learning-Management-System',
+                    resource_type: "raw"
+                });
+                if (result) {
+                    lectureData.materials.public_id = result.public_id;
+                    lectureData.materials.secure_url = result.secure_url;
+                }
+
+                fs.rmSync(`uploads/${req.files.pdf[0].filename}`);
+            } catch (e) {
+                return next(new AppError(e.message, 500));
             }
         }
 
@@ -207,7 +280,7 @@ const addLectureToCourseById = async (req, res, next) => {
         })
 
     } catch (e) {
-         return next(new AppError(e.message, 500));
+        return next(new AppError(e.message, 500));
     }
 }
 
