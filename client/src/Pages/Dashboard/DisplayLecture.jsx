@@ -63,23 +63,18 @@ export default function DisplayLecture() {
                     </span>
                     {lectures && lectures?.[currentVideo]?.title}
                   </h1>
-                  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  <p className="text-[16.5px] pb-5 text-gray-700 font-[500] dark:text-slate-300 font-lato">
                     <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
                       Description:{" "}
                     </span>
                     {lectures && lectures?.[currentVideo]?.description}
                   </p>
+                  
                   <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                    
-                  {lectures && lectures?.[currentVideo]?.link && (
-  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
-    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
-      Download pdf:{" "}
-    </span>
-    <a href={lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Show PDF</a>
-  </p>
-)}
-                    
+                    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
+                      Lecture pdf:{" "}
+                    </span>
+                    <a href= {lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 ">See PDF</a>
                   </p>
                 </div>
               </div>
