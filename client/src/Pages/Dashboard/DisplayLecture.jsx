@@ -69,6 +69,18 @@ export default function DisplayLecture() {
                     </span>
                     {lectures && lectures?.[currentVideo]?.description}
                   </p>
+                  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                    
+                  {lectures && lectures?.[currentVideo]?.link && (
+  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
+    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
+      Download pdf:{" "}
+    </span>
+    <a href={lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Show PDF</a>
+  </p>
+)}
+                    
+                  </p>
                 </div>
               </div>
             </div>
@@ -114,6 +126,8 @@ export default function DisplayLecture() {
                             Download PDF
                           </button>
                         )}
+
+                        {/* <a href="https://drive.google.com/file/d/13bpvjCJ5dFTqeG-WudgB8Pe4-r558ZX0/view?usp=sharing">Download pdf</a> */}
                         
                         {/* Admin Delete Button */}
                         {role === "ADMIN" && (

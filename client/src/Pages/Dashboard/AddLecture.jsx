@@ -22,6 +22,7 @@ export default function AddLecture() {
     lecture: undefined,
     title: "",
     description: "",
+    link: "",
     videoSrc: "",
     pdf: undefined,
     pdfName: ""
@@ -70,6 +71,7 @@ export default function AddLecture() {
     const formData = new FormData();
     formData.append("lecture", userInput.lecture);
     formData.append("title", userInput.title);
+    formData.append("link", userInput.link);
     formData.append("description", userInput.description);
     if (userInput.pdf) {
       formData.append("pdf", userInput.pdf);
@@ -84,6 +86,7 @@ export default function AddLecture() {
         id: courseDetails?._id,
         lecture: undefined,
         title: "",
+        link: "",
         description: "",
         videoSrc: "",
         pdf: undefined,
@@ -179,6 +182,14 @@ export default function AddLecture() {
                 placeholder={"Enter Lecture Title"}
                 onChange={handleInputChange}
                 value={userInput.title}
+              />
+                    <InputBox
+                label={"Link"}
+                name={"link"}
+                type={"text"}
+                placeholder={"Enter Link for pdf"}
+                onChange={handleInputChange}
+                value={userInput.link}
               />
               {/* description */}
               <TextArea
