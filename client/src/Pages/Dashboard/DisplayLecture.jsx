@@ -6,6 +6,7 @@ import {
   deleteCourseLecture,
 } from "../../Redux/Slices/LectureSlice";
 import Layout from "../../Layout/Layout";
+import toast from "react-hot-toast";
 
 export default function DisplayLecture() {
   const navigate = useNavigate();
@@ -23,17 +24,35 @@ export default function DisplayLecture() {
     await dispatch(getCourseLectures(courseId));
   }
 
+  const [answer, setAnswer] = useState("");
+  const [finalanswer, setFinalAnswer] = useState("");
+  const [showanswer, setShowAnswer] = useState("");
+  
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // setFinalAnswer(lectures && lectures?.[currentVideo]?.answer);
+    if(finalanswer === answer){
+      toast("✅ Correct Answer");
+    }
+    else{
+      toast("❌ Wrong Answer");
+    }
+  };
+  
+  
+  
   useEffect(() => {
     if (!state) navigate("/courses");
     dispatch(getCourseLectures(state._id));
   }, []);
-
+  
   // Function to handle PDF download
   const handlePdfDownload = (secure_url) => {
     // Open the PDF in a new window/tab which will trigger download
     window.open(secure_url, '_blank');
   };
-
+  
   return (
     <Layout hideFooter={true} hideNav={true} hideBar={true}>
       <section className="flex flex-col gap-6 items-center md:py-8 py-0 px-0 h-screen overflow-y-scroll">
@@ -70,13 +89,41 @@ export default function DisplayLecture() {
                     {lectures && lectures?.[currentVideo]?.description}
                   </p>
                   
-                  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  <p className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
                     <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
                       Lecture pdf:{" "}
                     </span>
                     <a href= {lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 ">See PDF</a>
                   </p>
+        
+                  <p className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
+                      Lecture Question:{" "}
+                    </span>
+                    {lectures && lectures?.[currentVideo]?.question}
+                  </p>
+                  Options
+                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  A = {lectures && lectures?.[currentVideo]?.optiona}
+                  </div>
+                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  B = {lectures && lectures?.[currentVideo]?.optionb}
+                  </div>
+                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  C = {lectures && lectures?.[currentVideo]?.optionc}
+                  </div>
+                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  D = {lectures && lectures?.[currentVideo]?.optiond}
+                  </div>
                 </div>
+                <select name="answer" id="" onChange={(e) => {setAnswer(e.target.value),setFinalAnswer(lectures && lectures?.[currentVideo]?.answer)} } className="w-full p-2 border bg-[#ffffff]  shadow-lg text-[#000000]">
+                  <option value="Select Answer">Select Answer</option>
+                  <option value="optiona">A</option>
+                  <option value="optionb">B</option>
+                  <option value="optionc">C</option>
+                  <option value="optiond">D</option>
+                </select>
+                <button className="bg-purple-800 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full mt-5" onClick={handleSubmit}>Submit</button>
               </div>
             </div>
 

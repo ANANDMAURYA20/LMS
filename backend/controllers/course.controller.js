@@ -213,10 +213,10 @@ const removeCourse = async (req, res, next) => {
 
 const addLectureToCourseById = async (req, res, next) => {
     try {
-        const { title, description,link } = req.body;
+        const { title, description,link,question, optiona, optionb, optionc, optiond, answer } = req.body;
         const { id } = req.params;
 
-        if (!title || !description || !link) {
+        if (!title || !description || !link || !question || !optiona || !optionb || !optionc || !optiond || !answer) {
             return next(new AppError('all fields are required', 500));
         }
 
@@ -230,6 +230,12 @@ const addLectureToCourseById = async (req, res, next) => {
             title,
             description,
             link,
+            question,
+            optiona,
+            optionb,
+            optionc,
+            optiond,
+            answer,
             lecture: {},
             materials: {}
         }
@@ -385,6 +391,8 @@ const updateCourseLecture = async (req, res, next) => {
     }
 };
 
+   
+
 
 export {
     getAllCourses,
@@ -394,5 +402,5 @@ export {
     removeCourse,
     addLectureToCourseById,
     deleteCourseLecture,
-    updateCourseLecture
+    updateCourseLecture,
 }

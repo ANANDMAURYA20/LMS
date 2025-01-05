@@ -23,6 +23,12 @@ export default function AddLecture() {
     title: "",
     description: "",
     link: "",
+    question: "",
+    optiona: "",
+    optionb: "",
+    optionc: "",
+    optiond: "",
+    answer: "",
     videoSrc: "",
     pdf: undefined,
     pdfName: ""
@@ -61,7 +67,7 @@ export default function AddLecture() {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    if (!userInput.lecture || !userInput.title || !userInput.description) {
+    if (!userInput.lecture || !userInput.title || !userInput.description || !userInput.link ) {
       toast.error("All fields are mandatory");
       return;
     }
@@ -73,6 +79,12 @@ export default function AddLecture() {
     formData.append("title", userInput.title);
     formData.append("link", userInput.link);
     formData.append("description", userInput.description);
+    formData.append("question", userInput.question);
+    formData.append("optiona", userInput.optiona);
+    formData.append("optionb", userInput.optionb);
+    formData.append("optionc", userInput.optionc);
+    formData.append("optiond", userInput.optiond);
+    formData.append("answer", userInput.answer);
     if (userInput.pdf) {
       formData.append("pdf", userInput.pdf);
     }
@@ -87,6 +99,12 @@ export default function AddLecture() {
         lecture: undefined,
         title: "",
         link: "",
+        question: "",
+        optiona: "",
+        optionb: "",
+        optionc: "",
+        optiond: "",
+        answer: "",
         description: "",
         videoSrc: "",
         pdf: undefined,
@@ -201,8 +219,73 @@ export default function AddLecture() {
                 onChange={handleInputChange}
                 value={userInput.description}
               />
+               <h1 className="text-center dark:text-purple-500 md:text-4xl text-2xl font-bold font-inter">
+              Add Test Question
+            </h1>
+               <InputBox
+                label={"Question"}
+                name={"question"}
+                type={"text"}
+                placeholder={"Enter Question "}
+                onChange={handleInputChange}
+                value={userInput.question}
+              />
+      
+                    <InputBox
+                label={"Option A"}
+                name={"optiona"}
+                type={"text"}
+                placeholder={"Enter Option A"}
+                onChange={handleInputChange}
+                value={userInput.optiona}
+              />
+                    <InputBox
+                label={"Option B"}
+                name={"optionb"}
+                type={"text"}
+                placeholder={"Enter Option B"}
+                onChange={handleInputChange}
+                value={userInput.optionb}
+                />
+                
+                   <InputBox
+                label={"Option C"}
+                name={"optionc"}
+                type={"text"}
+                placeholder={"Enter Option C"}
+                onChange={handleInputChange}
+                value={userInput.optionc}
+              />
+                    <InputBox
+                label={"Option D"}
+                name={"optiond"}
+                type={"text"}
+                placeholder={"Enter Option D"}
+                onChange={handleInputChange}
+                value={userInput.optiond}
+              />
+              <label htmlFor="answer" className="text-lg font-medium dark:text-gray-300">
+                Select Correct Answer
+              </label>
+              <select name="answer" id="" onChange={handleInputChange} value={userInput.answer} className="border border-gray-300 rounded-md p-2">
+                <option value="optiona">Option A</option>
+                <option value="optionb">Option B</option>
+                <option value="optionc">Option C</option>
+                <option value="optiond">Option D</option>
+              </select>
+                    {/* <InputBox
+                label={"Answer"}
+                name={"answer"}
+                type={"text"}
+                placeholder={"Enter Answer"}
+                onChange={handleInputChange}
+                value={userInput.answer}
+              /> */}
             </div>
+
+            
           </div>
+          
 
           {/* submit btn */}
           <button
@@ -214,6 +297,9 @@ export default function AddLecture() {
           </button>
         </form>
       </section>
+
+
+
     </Layout>
   );
 }
