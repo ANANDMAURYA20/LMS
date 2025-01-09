@@ -32,12 +32,6 @@ const courseSchema = new Schema({
             title: String,
             description: String,
             link: String,
-            question: String,
-            optiona: String,
-            optionb: String,
-            optionc: String,
-            optiond: String,
-            answer: String,
             lecture: {
                 public_id: {
                     type: String 
@@ -53,8 +47,22 @@ const courseSchema = new Schema({
                 secure_url: {
                     type: String
                 }
-            }
+            },
+            questions: [
+                {
+                    questionText: {
+                        type: String,
+                    },
+                    options: [{
+                        type: String,
+                    }],
+                    correctOption: {
+                        type: Number,
+                    },
+                }
+            ]
         }
+        
     ],
     numberOfLectures: {
         type: Number,

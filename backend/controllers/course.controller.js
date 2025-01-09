@@ -211,13 +211,120 @@ const removeCourse = async (req, res, next) => {
 //     }
 // }
 
+// const addLectureToCourseById = async (req, res, next) => {
+//     try {
+//         const { title, description,link } = req.body;
+//         const { id } = req.params;
+
+//         if (!title || !description || !link) {
+//             return next(new AppError('all fields are required', 500));
+//         }
+
+//         const course = await courseModel.findById(id);
+
+//         if (!course) {
+//             return next(new AppError('course with given id does not exist', 500));
+//         }
+
+//         const lectureData = {
+//             title,
+//             description,
+//             link,
+//             lecture: {},
+//             materials: {}
+//         }
+
+//         // Video upload
+//         if (req.files && req.files.lecture) {
+//             try {
+//                 const result = await cloudinary.v2.uploader.upload(req.files.lecture[0].path, {
+//                     folder: 'Learning-Management-System',
+//                     resource_type: "video"
+//                 });
+//                 if (result) {
+//                     lectureData.lecture.public_id = result.public_id;
+//                     lectureData.lecture.secure_url = result.secure_url;
+//                 }
+
+//                 fs.rmSync(`uploads/${req.files.lecture[0].filename}`);
+//             } catch (e) {
+//                 return next(new AppError(e.message, 500));
+//             }
+//         }
+
+//         // PDF upload
+//         if (req.files && req.files.pdf) {
+//             try {
+//                 const result = await cloudinary.v2.uploader.upload(req.files.pdf[0].path, {
+//                     folder: 'Learning-Management-System',
+//                     resource_type: "raw"
+//                 });
+//                 if (result) {
+//                     lectureData.materials.public_id = result.public_id;
+//                     lectureData.materials.secure_url = result.secure_url;
+//                 }
+
+//                 fs.rmSync(`uploads/${req.files.pdf[0].filename}`);
+//             } catch (e) {
+//                 return next(new AppError(e.message, 500));
+//             }
+//         }
+
+//         course.lectures.push(lectureData);
+//         course.numberOfLectures = course.lectures.length;
+
+//         await course.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'lecture added successfully'
+//         })
+
+//     } catch (e) {
+//         return next(new AppError(e.message, 500));
+//     }
+// }
+
+
+
+// delete lecture by course id and lecture id
+
 const addLectureToCourseById = async (req, res, next) => {
     try {
-        const { title, description,link,question, optiona, optionb, optionc, optiond, answer } = req.body;
+        const { title, description, link } = req.body;
         const { id } = req.params;
 
-        if (!title || !description || !link || !question || !optiona || !optionb || !optionc || !optiond || !answer) {
+        // Parse questions from FormData
+        let questions = [];
+        if (req.body.questions) {
+            try {
+                questions = JSON.parse(req.body.questions);
+            } catch (error) {
+                return next(new AppError('Invalid questions format', 400));
+            }
+        }
+
+        // Validate basic lecture details
+        if (!title || !description || !link) {
             return next(new AppError('all fields are required', 500));
+        }
+
+        // Validate questions format if provided
+        if (questions && questions.length > 0) {
+            const isValidQuestions = questions.every(question => {
+                return (
+                    question.questionText && 
+                    Array.isArray(question.options) &&
+                    question.options.length >= 2 &&
+                    typeof question.correctOption === 'number' &&
+                    question.correctOption >= 0 && 
+                    question.correctOption < question.options.length
+                );
+            });
+
+            if (!isValidQuestions) {
+                return next(new AppError('Invalid question format. Each question must have questionText, options array, and valid correctOption', 400));
+            }
         }
 
         const course = await courseModel.findById(id);
@@ -230,14 +337,9 @@ const addLectureToCourseById = async (req, res, next) => {
             title,
             description,
             link,
-            question,
-            optiona,
-            optionb,
-            optionc,
-            optiond,
-            answer,
             lecture: {},
-            materials: {}
+            materials: {},
+            questions // Add the parsed questions array
         }
 
         // Video upload
@@ -283,15 +385,16 @@ const addLectureToCourseById = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: 'lecture added successfully'
-        })
+            message: 'lecture and questions added successfully'
+        });
 
     } catch (e) {
         return next(new AppError(e.message, 500));
     }
 }
 
-// delete lecture by course id and lecture id
+
+
 const deleteCourseLecture = async (req, res, next) => {
     try {
         const { courseId, lectureId } = req.query;
@@ -391,7 +494,12 @@ const updateCourseLecture = async (req, res, next) => {
     }
 };
 
-   
+
+
+
+
+
+
 
 
 export {

@@ -16,6 +16,17 @@ export default function DisplayLecture() {
   const { role } = useSelector((state) => state.auth);
 
   const [currentVideo, setCurrentVideo] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [score, setScore] = useState(0);
+
+  // Reset quiz state when changing lectures
+  const handleLectureChange = (idx) => {
+    setCurrentVideo(idx);
+    setSelectedAnswers({});
+    setShowResults(false);
+    setScore(0);
+  };
 
   async function onLectureDelete(courseId, lectureId) {
     await dispatch(
@@ -24,56 +35,78 @@ export default function DisplayLecture() {
     await dispatch(getCourseLectures(courseId));
   }
 
-  const [answer, setAnswer] = useState("");
-  const [finalanswer, setFinalAnswer] = useState("");
-  const [showanswer, setShowAnswer] = useState("");
-  
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // setFinalAnswer(lectures && lectures?.[currentVideo]?.answer);
-    if(finalanswer === answer){
-      toast("✅ Correct Answer");
-    }
-    else{
-      toast("❌ Wrong Answer");
-    }
-  };
-  
-  
-  
   useEffect(() => {
     if (!state) navigate("/courses");
     dispatch(getCourseLectures(state._id));
   }, []);
   
-  // Function to handle PDF download
   const handlePdfDownload = (secure_url) => {
-    // Open the PDF in a new window/tab which will trigger download
     window.open(secure_url, '_blank');
+  };
+
+  const handleOptionSelect = (questionIndex, optionIndex) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [questionIndex]: optionIndex
+    });
+  };
+
+  const handleSubmitQuiz = () => {
+    const currentQuestions = lectures[currentVideo]?.questions || [];
+    
+    // Check if all questions are answered
+    const unansweredQuestions = currentQuestions.filter((_, index) => 
+      selectedAnswers[index] === undefined
+    );
+
+    if (unansweredQuestions.length > 0) {
+      toast.error(`Please answer all questions before submitting. ${unansweredQuestions.length} question${unansweredQuestions.length > 1 ? 's' : ''} remaining.`);
+      return;
+    }
+    
+    let correctAnswers = 0;
+    
+    currentQuestions.forEach((question, index) => {
+      if (selectedAnswers[index] === question.correctOption) {
+        correctAnswers++;
+      }
+    });
+    
+    const percentage = (correctAnswers / currentQuestions.length) * 100;
+    setScore(percentage);
+    setShowResults(true);
+    toast.success('Quiz submitted successfully!');
+  };
+
+  const handleRetakeQuiz = () => {
+    setSelectedAnswers({});
+    setShowResults(false);
+    setScore(0);
   };
   
   return (
     <Layout hideFooter={true} hideNav={true} hideBar={true}>
-      <section className="flex flex-col gap-6 items-center md:py-8 py-0 px-0 h-screen overflow-y-scroll">
-        <div className="flex flex-col dark:bg-base-100 relative md:gap-12 gap-5 rounded-lg md:py-10 md:pt-3 py-0 pt-3 md:px-7 px-0 md:w-[780px] w-full h-full overflow-y-hidden shadow-custom dark:shadow-xl">
+      <section className="flex flex-col gap-6 items-center py-8 px-4">
+        {/* Main content section */}
+        <div className="flex flex-col dark:bg-base-100 relative md:gap-12 gap-5 rounded-lg md:py-10 md:pt-3 py-4 pt-3 md:px-7 px-4 md:w-[780px] w-full shadow-custom dark:shadow-xl">
           <h1 className="text-center relative md:px-0 px-3 w-fit dark:text-purple-500 md:text-2xl text-lg font-bold font-inter after:content-[' '] after:absolute after:-bottom-2 md:after:left-0 after:left-3 after:h-[3px] after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600">
             Course:{" "}
             <span className="text-violet-500 dark:text-yellow-500 font-nunito-sans">
               {state?.title}
             </span>
           </h1>
-          <div className="flex md:flex-row flex-col md:justify-between w-full h-full">
+
+          <div className="flex md:flex-row flex-col md:justify-between w-full">
             {/* Left section for lecture video and details */}
-            <div className="md:w-[48%] w-full md:p-3 p-1 overflow-y-scroll md:h-full h-[40%] flex justify-center">
-              <div className="w-full h-[170px] border bg-[#0000003d] shadow-lg">
+            <div className="md:w-[48%] w-full md:p-3 p-1">
+              <div className="w-full">
                 <video
                   src={lectures && lectures?.[currentVideo]?.lecture?.secure_url}
                   disablePictureInPicture
                   disableRemotePlayback
                   controls
                   controlsList="nodownload"
-                  className="h-full mx-auto"
+                  className="h-[170px] mx-auto"
                 ></video>
                 <div className="py-7">
                   <h1 className="text-[17px] text-gray-700 font-[500] dark:text-white font-lato">
@@ -93,42 +126,16 @@ export default function DisplayLecture() {
                     <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
                       Lecture pdf:{" "}
                     </span>
-                    <a href= {lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 ">See PDF</a>
+                    <a href={lectures && lectures?.[currentVideo]?.link} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                      See PDF
+                    </a>
                   </p>
-        
-                  <p className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
-                      Lecture Question:{" "}
-                    </span>
-                    {lectures && lectures?.[currentVideo]?.question}
-                  </p>
-                  Options
-                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                  A = {lectures && lectures?.[currentVideo]?.optiona}
-                  </div>
-                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                  B = {lectures && lectures?.[currentVideo]?.optionb}
-                  </div>
-                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                  C = {lectures && lectures?.[currentVideo]?.optionc}
-                  </div>
-                  <div className="text-[16.5px] text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                  D = {lectures && lectures?.[currentVideo]?.optiond}
-                  </div>
                 </div>
-                <select name="answer" id="" onChange={(e) => {setAnswer(e.target.value),setFinalAnswer(lectures && lectures?.[currentVideo]?.answer)} } className="w-full p-2 border bg-[#ffffff]  shadow-lg text-[#000000]">
-                  <option value="Select Answer">Select Answer</option>
-                  <option value="optiona">A</option>
-                  <option value="optionb">B</option>
-                  <option value="optionc">C</option>
-                  <option value="optiond">D</option>
-                </select>
-                <button className="bg-purple-800 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full mt-5" onClick={handleSubmit}>Submit</button>
               </div>
             </div>
 
-            {/* Right section for lectures list and PDF materials */}
-            <div className="md:w-[48%] pb-12 md:flex-row flex-col w-full md:h-full h-[60%] overflow-y-scroll">
+            {/* Right section for lectures list */}
+            <div className="md:w-[48%] w-full max-h-[500px] overflow-y-auto">
               <ul className="w-full md:p-2 p-0 flex flex-col gap-5 shadow-sm">
                 <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex items-center justify-between">
                   <p>Lectures list</p>
@@ -153,13 +160,12 @@ export default function DisplayLecture() {
                               ? "text-blue-600 dark:text-yellow-500"
                               : "text-gray-600 dark:text-white"
                           }`}
-                          onClick={() => setCurrentVideo(idx)}
+                          onClick={() => handleLectureChange(idx)}
                         >
                           <span className="font-inter">{idx + 1}. </span>
                           {lecture?.title}
                         </p>
                         
-                        {/* PDF Download Button */}
                         {lecture?.materials?.secure_url && (
                           <button
                             onClick={() => handlePdfDownload(lecture.materials.secure_url)}
@@ -168,10 +174,7 @@ export default function DisplayLecture() {
                             Download PDF
                           </button>
                         )}
-
-                        {/* <a href="https://drive.google.com/file/d/13bpvjCJ5dFTqeG-WudgB8Pe4-r558ZX0/view?usp=sharing">Download pdf</a> */}
                         
-                        {/* Admin Delete Button */}
                         {role === "ADMIN" && (
                           <button
                             onClick={() => onLectureDelete(state?._id, lecture?._id)}
@@ -186,6 +189,90 @@ export default function DisplayLecture() {
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* Questions Section */}
+        <div className="flex flex-col dark:bg-base-100 rounded-lg md:py-8 py-4 md:px-7 px-4 md:w-[780px] w-full shadow-custom dark:shadow-xl">
+          <h2 className="text-center text-2xl font-bold text-blue-500 dark:text-yellow-500 font-inter mb-6">
+            Practice Questions
+          </h2>
+          
+          {lectures?.[currentVideo]?.questions?.length > 0 ? (
+            <>
+              <div className="space-y-6">
+                {lectures[currentVideo].questions.map((question, qIndex) => (
+                  <div 
+                    key={qIndex} 
+                    className="border dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg"
+                  >
+                    <h3 className="text-[17px] font-[500] text-gray-700 dark:text-white font-lato mb-4">
+                      <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold">
+                        Question {qIndex + 1}:{" "}
+                      </span>
+                      {question.questionText}
+                    </h3>
+                    
+                    <div className="space-y-3 pl-4">
+                      {question.options.map((option, oIndex) => (
+                        <div
+                          key={oIndex}
+                          className={`flex items-center gap-3 p-3 border dark:border-gray-700 rounded-md cursor-pointer
+                            ${showResults 
+                              ? oIndex === question.correctOption 
+                                ? 'bg-green-100 dark:bg-green-900'
+                                : selectedAnswers[qIndex] === oIndex
+                                  ? 'bg-red-100 dark:bg-red-900'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                              : selectedAnswers[qIndex] === oIndex
+                                ? 'bg-blue-50 dark:bg-blue-900'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                            }`}
+                          onClick={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                        >
+                          <input
+                            type="radio"
+                            name={`question-${qIndex}`}
+                            checked={selectedAnswers[qIndex] === oIndex}
+                            onChange={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                            className="w-4 h-4"
+                            disabled={showResults}
+                          />
+                          <label className="cursor-pointer text-gray-600 dark:text-gray-300 font-lato">
+                            {option}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-8 flex flex-col items-center gap-4">
+                {showResults && (
+                  <div className="text-center mb-4">
+                    <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                      Your Score: {score.toFixed(1)}%
+                    </p>
+                  </div>
+                )}
+                
+                <button
+                  onClick={showResults ? handleRetakeQuiz : handleSubmitQuiz}
+                  className={`px-6 py-3 rounded-lg font-semibold text-white transition-colors
+                    ${showResults 
+                      ? 'bg-yellow-500 hover:bg-yellow-600'
+                      : 'bg-violet-500 hover:bg-violet-600'
+                    }`}
+                >
+                  {showResults ? 'Retake Quiz' : 'Submit Answers'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-center text-gray-500 dark:text-gray-400 font-lato py-4">
+              No questions available for this lecture.
+            </p>
+          )}
         </div>
       </section>
     </Layout>

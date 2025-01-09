@@ -33,6 +33,7 @@ app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/', miscellaneousRoutes);
+
  
 
 // app.all('*', (req, res) => {

@@ -141,7 +141,6 @@ export default function Sidebar({ hideBar = false }) {
                 </Link>
               </li>
             )}
-
        
 
             <li>

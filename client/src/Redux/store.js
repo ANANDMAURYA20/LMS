@@ -6,6 +6,7 @@ import LectureSliceReducer from "./Slices/LectureSlice"
 import StatSliceReducer from "./Slices/StatSlice"
 import BlogReducer from './Slices/BlogSlice';
 
+
  const store = configureStore({
     reducer: {
         auth: AuthSliceReducer,

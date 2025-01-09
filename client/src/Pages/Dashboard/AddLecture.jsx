@@ -8,6 +8,7 @@ import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { FiUpload } from "react-icons/fi";
+import { AiOutlinePlusCircle, AiOutlineMinusCircle } from "react-icons/ai";
 
 export default function AddLecture() {
   const courseDetails = useLocation().state;
@@ -23,15 +24,17 @@ export default function AddLecture() {
     title: "",
     description: "",
     link: "",
-    question: "",
-    optiona: "",
-    optionb: "",
-    optionc: "",
-    optiond: "",
-    answer: "",
     videoSrc: "",
     pdf: undefined,
-    pdfName: ""
+    pdfName: "",
+    questions: [
+      {
+        questionText: "",
+        options: ["", ""],
+        correctOption: 0,
+        explanation: ""
+      }
+    ]
   });
 
   function handleInputChange(e) {
@@ -40,6 +43,77 @@ export default function AddLecture() {
       ...userInput,
       [name]: value,
     });
+  }
+
+  function handleQuestionChange(index, field, value) {
+    const updatedQuestions = [...userInput.questions];
+    if (field === 'questionText' || field === 'explanation') {
+      updatedQuestions[index][field] = value;
+    } else if (field === 'correctOption') {
+      updatedQuestions[index][field] = parseInt(value);
+    }
+    setUserInput({
+      ...userInput,
+      questions: updatedQuestions
+    });
+  }
+
+  function handleOptionChange(questionIndex, optionIndex, value) {
+    const updatedQuestions = [...userInput.questions];
+    updatedQuestions[questionIndex].options[optionIndex] = value;
+    setUserInput({
+      ...userInput,
+      questions: updatedQuestions
+    });
+  }
+
+  function addOption(questionIndex) {
+    const updatedQuestions = [...userInput.questions];
+    updatedQuestions[questionIndex].options.push("");
+    setUserInput({
+      ...userInput,
+      questions: updatedQuestions
+    });
+  }
+
+  function removeOption(questionIndex, optionIndex) {
+    const updatedQuestions = [...userInput.questions];
+    if (updatedQuestions[questionIndex].options.length > 2) {
+      updatedQuestions[questionIndex].options.splice(optionIndex, 1);
+      setUserInput({
+        ...userInput,
+        questions: updatedQuestions
+      });
+    } else {
+      toast.error("Minimum 2 options are required");
+    }
+  }
+
+  function addQuestion() {
+    setUserInput({
+      ...userInput,
+      questions: [
+        ...userInput.questions,
+        {
+          questionText: "",
+          options: ["", ""],
+          correctOption: 0,
+          explanation: ""
+        }
+      ]
+    });
+  }
+
+  function removeQuestion(index) {
+    if (userInput.questions.length > 1) {
+      const updatedQuestions = userInput.questions.filter((_, i) => i !== index);
+      setUserInput({
+        ...userInput,
+        questions: updatedQuestions
+      });
+    } else {
+      toast.error("At least one question is required");
+    }
   }
 
   function handleVideo(e) {
@@ -65,54 +139,94 @@ export default function AddLecture() {
     });
   }
 
+
   async function onFormSubmit(e) {
     e.preventDefault();
-    if (!userInput.lecture || !userInput.title || !userInput.description || !userInput.link ) {
+    if (!userInput.lecture || !userInput.title || !userInput.description || !userInput.link) {
       toast.error("All fields are mandatory");
       return;
     }
 
+    let hasError = false;
+
+    // Validate questions
+    for (let i = 0; i < userInput.questions.length; i++) {
+      const question = userInput.questions[i];
+      
+      if (!question.questionText || question.questionText.trim() === "") {
+        toast.error(`Question ${i + 1}: Question text cannot be empty`);
+        hasError = true;
+        break;
+      }
+
+      if (!question.options || question.options.length < 2) {
+        toast.error(`Question ${i + 1}: Must have at least 2 options`);
+        hasError = true;
+        break;
+      }
+
+      for (let j = 0; j < question.options.length; j++) {
+        if (!question.options[j] || question.options[j].trim() === "") {
+          toast.error(`Question ${i + 1}, Option ${j + 1}: Cannot be empty`);
+          hasError = true;
+          break;
+        }
+      }
+
+      if (question.correctOption === undefined || 
+          question.correctOption < 0 || 
+          question.correctOption >= question.options.length) {
+        toast.error(`Question ${i + 1}: Please select a valid correct option`);
+        hasError = true;
+        break;
+      }
+    }
+
+    if (hasError) return;
+
     setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append("lecture", userInput.lecture);
-    formData.append("title", userInput.title);
-    formData.append("link", userInput.link);
-    formData.append("description", userInput.description);
-    formData.append("question", userInput.question);
-    formData.append("optiona", userInput.optiona);
-    formData.append("optionb", userInput.optionb);
-    formData.append("optionc", userInput.optionc);
-    formData.append("optiond", userInput.optiond);
-    formData.append("answer", userInput.answer);
-    if (userInput.pdf) {
-      formData.append("pdf", userInput.pdf);
-    }
+    try {
+      const formData = new FormData();
+      formData.append("lecture", userInput.lecture);
+      formData.append("title", userInput.title);
+      formData.append("link", userInput.link);
+      formData.append("description", userInput.description);
+      formData.append("questions", JSON.stringify(userInput.questions));
 
-    const data = { formData, id: userInput.id };
+      if (userInput.pdf) {
+        formData.append("pdf", userInput.pdf);
+      }
 
-    const response = await dispatch(addCourseLecture(data));
-    if (response?.payload?.success) {
-      navigate(-1);
-      setUserInput({
-        id: courseDetails?._id,
-        lecture: undefined,
-        title: "",
-        link: "",
-        question: "",
-        optiona: "",
-        optionb: "",
-        optionc: "",
-        optiond: "",
-        answer: "",
-        description: "",
-        videoSrc: "",
-        pdf: undefined,
-        pdfName: ""
-      });
+      const data = { formData, id: userInput.id };
+
+      const response = await dispatch(addCourseLecture(data));
+      if (response?.payload?.success) {
+        navigate(-1);
+        setUserInput({
+          id: courseDetails?._id,
+          lecture: undefined,
+          title: "",
+          link: "",
+          description: "",
+          videoSrc: "",
+          pdf: undefined,
+          pdfName: "",
+          questions: [{
+            questionText: "",
+            options: ["", ""],
+            correctOption: 0,
+            explanation: ""
+          }]
+        });
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }
+}
+
 
   useEffect(() => {
     if (!courseDetails) navigate("/courses");
@@ -219,73 +333,97 @@ export default function AddLecture() {
                 onChange={handleInputChange}
                 value={userInput.description}
               />
-               <h1 className="text-center dark:text-purple-500 md:text-4xl text-2xl font-bold font-inter">
-              Add Test Question
-            </h1>
-               <InputBox
-                label={"Question"}
-                name={"question"}
-                type={"text"}
-                placeholder={"Enter Question "}
-                onChange={handleInputChange}
-                value={userInput.question}
-              />
-      
-                    <InputBox
-                label={"Option A"}
-                name={"optiona"}
-                type={"text"}
-                placeholder={"Enter Option A"}
-                onChange={handleInputChange}
-                value={userInput.optiona}
-              />
-                    <InputBox
-                label={"Option B"}
-                name={"optionb"}
-                type={"text"}
-                placeholder={"Enter Option B"}
-                onChange={handleInputChange}
-                value={userInput.optionb}
-                />
-                
-                   <InputBox
-                label={"Option C"}
-                name={"optionc"}
-                type={"text"}
-                placeholder={"Enter Option C"}
-                onChange={handleInputChange}
-                value={userInput.optionc}
-              />
-                    <InputBox
-                label={"Option D"}
-                name={"optiond"}
-                type={"text"}
-                placeholder={"Enter Option D"}
-                onChange={handleInputChange}
-                value={userInput.optiond}
-              />
-              <label htmlFor="answer" className="text-lg font-medium dark:text-gray-300">
-                Select Correct Answer
-              </label>
-              <select name="answer" id="" onChange={handleInputChange} value={userInput.answer} className="border border-gray-300 rounded-md p-2">
-                <option value="optiona">Option A</option>
-                <option value="optionb">Option B</option>
-                <option value="optionc">Option C</option>
-                <option value="optiond">Option D</option>
-              </select>
-                    {/* <InputBox
-                label={"Answer"}
-                name={"answer"}
-                type={"text"}
-                placeholder={"Enter Answer"}
-                onChange={handleInputChange}
-                value={userInput.answer}
-              /> */}
-            </div>
-
-            
-          </div>
           
+            </div>
+            </div>
+            <div className="w-full mt-5">
+            <h2 className="text-xl font-bold mb-4">MCQ Questions</h2>
+            {userInput.questions.map((question, questionIndex) => (
+              <div key={questionIndex} className="mb-8 p-4 border rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Question {questionIndex + 1}</h3>
+                  <button
+                    type="button"
+                    onClick={() => removeQuestion(questionIndex)}
+                    className="text-red-500"
+                  >
+                    <AiOutlineMinusCircle className="text-xl" />
+                  </button>
+                </div>
+
+                {/* Question Text */}
+                <TextArea
+                  label="Question Text"
+                  value={question.questionText}
+                  onChange={(e) => handleQuestionChange(questionIndex, 'questionText', e.target.value)}
+                  placeholder="Enter your question"
+                  className="mb-4"
+                />
+
+                {/* Options */}
+                <div className="ml-4">
+                  {question.options.map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex items-center gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={option}
+                        onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                        placeholder={`Option ${optionIndex + 1}`}
+                        className="flex-1 p-2 border rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeOption(questionIndex, optionIndex)}
+                        className="text-red-500"
+                      >
+                        <AiOutlineMinusCircle />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addOption(questionIndex)}
+                    className="text-green-500 flex items-center gap-1 mt-2"
+                  >
+                    <AiOutlinePlusCircle /> Add Option
+                  </button>
+                </div>
+
+                {/* Correct Option */}
+                <div className="mt-4">
+                  <label className="block mb-2">Correct Option:</label>
+                  <select
+                    value={question.correctOption}
+                    onChange={(e) => handleQuestionChange(questionIndex, 'correctOption', e.target.value)}
+                    className="p-2 border rounded"
+                  >
+                    {question.options.map((_, index) => (
+                      <option key={index} value={index}>
+                        Option {index + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Explanation */}
+                <TextArea
+                  label="Explanation (Optional)"
+                  value={question.explanation}
+                  onChange={(e) => handleQuestionChange(questionIndex, 'explanation', e.target.value)}
+                  placeholder="Explain the correct answer"
+                  className="mt-4"
+                />
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addQuestion}
+              className="w-full py-2 bg-green-500 text-white rounded-md flex items-center justify-center gap-2"
+            >
+              <AiOutlinePlusCircle /> Add New Question
+            </button>
+          </div>
 
           {/* submit btn */}
           <button
