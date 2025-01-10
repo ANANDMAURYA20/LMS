@@ -6,12 +6,35 @@ import hero1Png from "../assets/images/hero1.png";
 import logo from "../assets/images/logo1.png";
 
 export default function HomePage() {
+  const facultyMembers = [
+    {
+      id: 1,
+      name: "Dr. Sarah Johnson",
+      role: "Senior Professor",
+      description: "Expert in Computer Science with 15+ years of teaching experience in AI and Machine Learning.",
+      image: hero1Png // Replace with actual faculty image
+    },
+    {
+      id: 2,
+      name: "Prof. Michael Chen",
+      role: "Department Head",
+      description: "Specialized in Digital Marketing and Business Strategy with extensive industry experience.",
+      image: heroPng // Replace with actual faculty image
+    },
+    {
+      id: 3,
+      name: "Dr. Emily Rodriguez",
+      role: "Lead Instructor",
+      description: "Renowned expert in Data Science and Analytics with numerous published research papers.",
+      image: logo // Replace with actual faculty image
+    }
+  ];
   return (
     <Layout>
 
       <section className="md:py-10 py-7 mb-10 text-white flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 md:px-16 px-6 min-h-[85vh]">
         <div className="md:w-1/2 w-full space-y-7">
-          <h1 className="md:text-5xl text-6xl font-semibold text-gray-900 dark:text-gray-200">
+          <h1 className="md:text-5xl text-5xl font-semibold text-gray-900 dark:text-gray-200">
             <img src={logo} alt="" className="md:h-[100px] h-[65px] md:px-[35px] px-[15px]"/>
            <span className="text-red-700 font-bold font-open-sans">Lyceum </span> 
             <span className="text-yellow-500 font-bold font-open-sans"> Knowledge Art Entertainment</span>
@@ -94,6 +117,43 @@ export default function HomePage() {
     We’re committed to helping you achieve your goals. With a focus on quality, innovation, and support, our platform is built to inspire and empower learners at every stage of their journey. Take the leap today!
     </p>
   </div>
+      </section>
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-yellow-500 mb-12">
+            Our Top Faculty
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {facultyMembers.map((faculty) => (
+              <div 
+                key={faculty.id} 
+                className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:transform hover:scale-105"
+              >
+                <div className="relative">
+                  <img 
+                    src={faculty.image} 
+                    alt={faculty.name}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <h3 className="text-xl font-bold text-white">
+                      {faculty.name}
+                    </h3>
+                    <p className="text-yellow-400 font-medium">
+                      {faculty.role}
+                    </p>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {faculty.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
     </Layout>

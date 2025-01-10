@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaSun, FaMoon } from "react-icons/fa";
 import logo from '../assets/images/name.png'
+import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   const [darkMode, setDarkMode] = useState(
@@ -28,7 +29,9 @@ export default function Navbar() {
       
 <nav className="sticky top-0 z-50 md:h-[72px] h-[65px] md:px-[35px] px-[15px] bg-[#ffffffd0] dark:bg-[#21242bc5] shadow-custom backdrop-blur-md flex justify-between">
   <h1 className="text-lg font-bold text-gray-900 dark:text-white self-center pl-10 mb-2"></h1>
-  <img src={logo} alt="" className="w-32 h-4/5 pt-5" />
+  <Link to={"/"}>
+  <img src={logo} alt="" className="w-32 h-4/5 pt-5"/>
+  </Link>
   <button className="p-5 rounded-full text-lg font-semibold">
     {darkMode ? (
       <FaSun size={26} className="text-white" onClick={toggleDarkMode} />

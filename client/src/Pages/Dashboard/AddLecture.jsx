@@ -369,7 +369,7 @@ export default function AddLecture() {
                         value={option}
                         onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
                         placeholder={`Option ${optionIndex + 1}`}
-                        className="flex-1 p-2 border rounded"
+                        className="flex-1 p-2 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       />
                       <button
                         type="button"
@@ -395,7 +395,7 @@ export default function AddLecture() {
                   <select
                     value={question.correctOption}
                     onChange={(e) => handleQuestionChange(questionIndex, 'correctOption', e.target.value)}
-                    className="p-2 border rounded"
+                    className="flex-1 p-2 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     {question.options.map((_, index) => (
                       <option key={index} value={index}>

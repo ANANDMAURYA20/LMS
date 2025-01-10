@@ -16,8 +16,8 @@ export default function Checkout() {
   const navigate = useNavigate();
   const rzorpayKey = useSelector((state) => state?.razorpay?.key);
   const [subscription_id, setSubscription_id] = useState(
-    useSelector((state) => state?.razorpay?.subscription_id)
-  );
+    useSelector((state) => state?.razorpay?.subscription_id) || ""
+);
   const isPaymentVerified = useSelector(
     (state) => state?.razorpay?.isPaymentVerified
   );
@@ -30,40 +30,75 @@ export default function Checkout() {
 
   async function handleSubscription(e) {
     e.preventDefault();
-    if (!rzorpayKey  ) {
-      console.log(rzorpayKey);
-      console.error("Missing RazorPay key or subscription ID");
-      toast.error("Something went wrong");
-      return;
+    
+    try {
+        // Basic validation
+        if (!rzorpayKey || !subscription_id) {
+            toast.error("Payment initialization failed. Please try again.");
+            console.error("Missing key:", { rzorpayKey, subscription_id });
+            return;
+        }
+
+        // Validate user data
+        if (!userData?.email || !userData?.fullName) {
+            toast.error("User information is missing. Please login again.");
+            return;
+        }
+
+        const options = {
+            key: rzorpayKey,
+            subscription_id: subscription_id,
+            name: "Lyceum",
+            description: "Subscription Bundle Purchase",
+            theme: {
+                color: "#F4BF1E"
+            },
+            prefill: {
+                email: userData.email,
+                name: userData.fullName
+            },
+            handler: async function (response) {
+                try {
+                    paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
+                    paymentDetails.razorpay_signature = response.razorpay_signature;
+                    paymentDetails.razorpay_subscription_id = response.razorpay_subscription_id;
+
+                    const res = await dispatch(verifyUserPayment(paymentDetails));
+                    
+                    if (res?.payload?.success) {
+                        await dispatch(getUserData());
+                        toast.success("Payment Successful!");
+                        navigate("/checkout/success");
+                    } else {
+                        toast.error("Payment verification failed. Please contact support.");
+                    }
+                } catch (error) {
+                    console.error("Payment verification error:", error);
+                    toast.error("Payment verification failed. Please contact support.");
+                }
+            }
+        };
+
+        // Create Razorpay instance
+        const paymentObject = new window.Razorpay(options);
+        
+        // Add error handler
+        paymentObject.on('payment.failed', function (response) {
+            toast.error("Payment failed. Please try again.");
+            console.error("Payment failed:", response.error);
+        });
+
+        // Open payment window
+        paymentObject.open();
+
+    } catch (error) {
+        // Handle any errors that occur during payment initialization
+        console.error("Payment error:", error);
+        toast.error("Unable to initialize payment. Please try again.");
     }
-  }
+}
 
-  useEffect(() => {
-    // Fetch the RazorPay ID
-    (async () => {
-      await dispatch(getRazorPayId());
-    })();
 
-    // Check the user's subscription status
-    switch (userData?.subscription?.status) {
-      case "active":
-        // Navigate outside of the switch statement
-        navigate("/courses");
-        break;
-
-      // if already created subscription, then use previous id for this
-      case "created":
-        setSubscription_id(userData?.subscription?.id);
-        break;
-
-      default:
-        // If the user doesn't have a subscription, purchase a bundle
-        (async () => {
-          await dispatch(purchaseCourseBundle());
-        })();
-        break;
-    }
-  }, [dispatch, navigate, userData]);
   return (
     <Layout>
       <section className="flex flex-col gap-6 items-center py-8 px-3 min-h-[100vh]">

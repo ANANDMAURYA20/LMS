@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../Layout/Layout';
-import { layouts } from 'chart.js';
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -8,7 +7,7 @@ const Blog = () => {
   const [error, setError] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
-  const URL = BASE_URL+ 'api/v1/blog/all'
+  const URL = BASE_URL + 'api/v1/blog/all';
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -33,7 +32,7 @@ const Blog = () => {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 dark:border-purple-400"></div>
         </div>
       </Layout>
     );
@@ -41,53 +40,53 @@ const Blog = () => {
 
   return (
     <Layout>
-
-    <div className="container mx-auto px-4 py-8">
-    <h1 className="md:text-4xl text-2xl w-fit text-blue-600 dark:text-white font-inter font-[500] after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600 mb-10">
-          Blogs By {" "}
-          <span className="font-[600] font-lato text-yellow-500">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="md:text-4xl text-2xl w-fit text-blue-600 dark:text-blue-400 font-inter font-[500] after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600 mb-10">
+          Blogs By {""}
+          <span className="font-[600] font-lato text-yellow-500 dark:text-yellow-400">
             Lyceum
           </span>
         </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        {blogs.map((blog) => (
-          <div 
-          key={blog._id} 
-            className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogs.map((blog) => (
+            <div
+              key={blog._id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl dark:shadow-gray-700"
             >
-            {blog.thumbnail && blog.thumbnail.secure_url && (
-              <img 
-                src={blog.thumbnail.secure_url} 
-                alt={blog.title} 
-                className="w-full h-48 object-cover"
+              {blog.thumbnail && blog.thumbnail.secure_url && (
+                <img
+                  src={blog.thumbnail.secure_url}
+                  alt={blog.title}
+                  className="w-full h-48 object-cover"
                 />
-            )}
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                {blog.title}
-              </h2>
-              <p className="text-gray-600 text-sm mb-4">
-                {blog.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  Created: {new Date(blog.createdAt).toLocaleDateString()}
-                </span>
-                <a href={blog.link} target="_blank" rel="noreferrer noopener">
-                <button 
-                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
+              )}
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {blog.title}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                  {blog.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Created: {new Date(blog.createdAt).toLocaleDateString()}
+                  </span>
+                  <a
+                    href={blog.link}
+                    target="_blank"
+                    rel="noreferrer noopener"
                   >
-                  Read More
-                </button>
-                </a>
+                    <button className="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white text-xs rounded-full hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                      Read More
+                    </button>
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-</Layout>
+    </Layout>
   );
 };
 
