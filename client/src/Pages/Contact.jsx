@@ -11,6 +11,7 @@ export default function Contact() {
   const [userInput, setUserInput] = useState({
     name: "",
     email: "",
+    number: "",
     message: "",
   });
 
@@ -24,7 +25,7 @@ export default function Contact() {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    if (!userInput.email || !userInput.name || !userInput.message) {
+    if (!userInput.email || !userInput.name || !userInput.message || !userInput.number) {
       toast.error("All fields are mandatory");
       return;
     }
@@ -42,6 +43,7 @@ export default function Contact() {
       setUserInput({
         name: "",
         email: "",
+        number: "",
         message: "",
       });
     } catch (error) {
@@ -80,6 +82,15 @@ export default function Contact() {
             placeholder={"Enter your email..."}
             onChange={handleInputChange}
             value={userInput.email}
+          />
+          {/* number */}
+          <InputBox
+            label={"Number"}
+            name={"number"}
+            type={"number"}
+            placeholder={"Enter your number..."}
+            onChange={handleInputChange}
+            value={userInput.number}
           />
           {/* message */}
           <TextArea

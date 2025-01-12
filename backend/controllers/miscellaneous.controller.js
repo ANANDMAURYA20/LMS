@@ -3,14 +3,14 @@ import sendEmail from '../utils/sendEmail.js';
 import userModel from '../models/user.model.js';
 
 const contactUs = async (req, res, next) => {
-    const { name, email, message} = req.body;
+    const { name, email, message,number} = req.body;
 
     if (!name || !email || !message) {
         return next(new AppError("All fields are required", 400));
     }
 
     try {
-        const emailMessage = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
+        const emailMessage = `Name: ${name}\nEmail: ${email}\nMessage: ${message} \nNumber: ${number} `;
 
         // Send email to the organization
         await sendEmail(
