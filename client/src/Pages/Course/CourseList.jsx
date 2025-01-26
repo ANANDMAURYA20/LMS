@@ -20,9 +20,6 @@ export default function CourseList() {
   return (
     <Layout>
       <section className="flex flex-col gap-14 md:py-6 py-5 md:px-20 px-3 min-h-screen">
-      <a href="https://wa.me/+916394499123 " target="_blank" rel="noopener noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" alt="WhatsApp" className="fixed bottom-5 right-5 md:w-10 md:h-10 w-8 h-8 z-50" />
-</a>
         <h1 className="md:text-4xl text-2xl w-fit text-blue-600 dark:text-white font-inter font-[500] after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600">
           Explore the courses made by{" "}
           <span className="font-[600] font-lato text-yellow-500">
