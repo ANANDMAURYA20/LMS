@@ -33,9 +33,6 @@ export default function HomePage() {
     <Layout>
 
       <section className="md:py-10 py-7 mb-10 text-white flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 md:px-16 px-6 min-h-[85vh]">
-        {/* <a href="https://wa.me/+916394499123 " target="_blank" rel="noopener noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" alt="WhatsApp" className="fixed bottom-5 right-5 md:w-10 md:h-10 w-8 h-8 z-50" />
-</a> */}
         <div className="md:w-1/2 w-full space-y-7">
           <h1 className="md:text-5xl text-5xl font-semibold text-gray-900 dark:text-gray-200">
             <img src={logo} alt="" className="md:h-[100px] h-[65px] md:px-[35px] px-[15px]"/>
