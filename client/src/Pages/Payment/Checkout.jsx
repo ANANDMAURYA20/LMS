@@ -14,90 +14,121 @@ import { getUserData } from "../../Redux/Slices/AuthSlice";
 export default function Checkout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Get data from Redux store
   const rzorpayKey = useSelector((state) => state?.razorpay?.key);
-  const [subscription_id, setSubscription_id] = useState(
-    useSelector((state) => state?.razorpay?.subscription_id) || ""
-);
-  const isPaymentVerified = useSelector(
-    (state) => state?.razorpay?.isPaymentVerified
-  );
+  const subscription_id = useSelector((state) => state?.razorpay?.subscription_id);
   const userData = useSelector((state) => state?.auth?.data);
-  const paymentDetails = {
-    razorpay_payment_id: "",
-    razorpay_signature: "",
-    razorpay_subscription_id: subscription_id,
+
+  // Load Razorpay script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => {
+        resolve(true);
+      };
+      script.onerror = () => {
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
   };
+
+  // Initialize payment data
+  useEffect(() => {
+    async function initPayment() {
+      try {
+        await dispatch(getRazorPayId());
+        await dispatch(purchaseCourseBundle());
+      } catch (error) {
+        console.error("Payment initialization error:", error);
+        toast.error("Failed to initialize payment");
+      }
+    }
+    initPayment();
+  }, [dispatch]);
 
   async function handleSubscription(e) {
     e.preventDefault();
-    
+    setIsLoading(true);
+
     try {
-        // Basic validation
-        if (!rzorpayKey || !subscription_id) {
-            toast.error("Payment initialization failed. Please try again.");
-            console.error("Missing key:", { rzorpayKey, subscription_id });
-            return;
-        }
+      // Load Razorpay script if not already loaded
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load");
+        return;
+      }
 
-        // Validate user data
-        if (!userData?.email || !userData?.fullName) {
-            toast.error("User information is missing. Please login again.");
-            return;
-        }
+      // Validate required data
+      if (!rzorpayKey || !subscription_id) {
+        // console.error("Missing payment data:", { rzorpayKey, subscription_id });
+        toast.error("Payment initialization failed");
+        return;
+      }
 
-        const options = {
-            key: rzorpayKey,
-            subscription_id: subscription_id,
-            name: "Lyceum",
-            description: "Subscription Bundle Purchase",
-            theme: {
-                color: "#F4BF1E"
-            },
-            prefill: {
-                email: userData.email,
-                name: userData.fullName
-            },
-            handler: async function (response) {
-                try {
-                    paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
-                    paymentDetails.razorpay_signature = response.razorpay_signature;
-                    paymentDetails.razorpay_subscription_id = response.razorpay_subscription_id;
+      if (!userData?.email || !userData?.fullName) {
+        toast.error("Please login to continue");
+        navigate("/login");
+        return;
+      }
 
-                    const res = await dispatch(verifyUserPayment(paymentDetails));
-                    
-                    if (res?.payload?.success) {
-                        await dispatch(getUserData());
-                        toast.success("Payment Successful!");
-                        navigate("/checkout/success");
-                    } else {
-                        toast.error("Payment verification failed. Please contact support.");
-                    }
-                } catch (error) {
-                    console.error("Payment verification error:", error);
-                    toast.error("Payment verification failed. Please contact support.");
-                }
+      const options = {
+        key: rzorpayKey,
+        subscription_id: subscription_id,
+        name: "Lyceum",
+        description: "Subscription Bundle Purchase",
+        theme: {
+          color: "#F4BF1E",
+        },
+        prefill: {
+          email: userData.email,
+          name: userData.fullName,
+        },
+        handler: async function (response) {
+          try {
+            const paymentDetails = {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+            };
+
+            const verificationResponse = await dispatch(
+              verifyUserPayment(paymentDetails)
+            ).unwrap();
+
+            if (verificationResponse?.success) {
+              await dispatch(getUserData());
+              toast.success("Payment Successful!");
+              navigate("/checkout/success");
             }
-        };
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            toast.error("Payment verification failed");
+          }
+        },
+      };
 
-        // Create Razorpay instance
-        const paymentObject = new window.Razorpay(options);
-        
-        // Add error handler
-        paymentObject.on('payment.failed', function (response) {
-            toast.error("Payment failed. Please try again.");
-            console.error("Payment failed:", response.error);
-        });
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on("payment.failed", function (response) {
+        toast.error(response.error.description || "Payment failed");
+      });
 
-        // Open payment window
-        paymentObject.open();
-
+      // console.log("Opening Razorpay modal with options:", {
+      //   key: options.key,
+      //   subscription_id: options.subscription_id,
+      // });
+      
+      paymentObject.open();
     } catch (error) {
-        // Handle any errors that occur during payment initialization
-        console.error("Payment error:", error);
-        toast.error("Unable to initialize payment. Please try again.");
+      console.error("Payment error:", error);
+      toast.error("Payment failed to initialize");
+    } finally {
+      setIsLoading(false);
     }
-}
-
+  }
 
   return (
     <Layout>
@@ -131,9 +162,12 @@ export default function Checkout() {
 
               <button
                 type="submit"
-                className="bg-yellow-500  transition duration-300 w-full text-xl font-bold text-white py-2 rounded-bl-lg rounded-br-lg"
+                disabled={isLoading}
+                className={`bg-yellow-500 transition duration-300 w-full text-xl font-bold text-white py-2 rounded-bl-lg rounded-br-lg ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-yellow-600"
+                }`}
               >
-                Buy now
+                {isLoading ? "Processing..." : "Buy now"}
               </button>
             </div>
           </div>
