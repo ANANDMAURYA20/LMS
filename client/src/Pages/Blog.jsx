@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../Layout/Layout';
 import { motion } from 'framer-motion';
 import { useScroll, useTransform } from 'framer-motion';
+import { axiosInstance } from '../Helpers/axiosInstance';
+import toast from 'react-hot-toast';
 
 const Blog = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
+  const [currentBlog, setCurrentBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,27 +18,43 @@ const Blog = () => {
   const y1 = useTransform(scrollY, [0, 500], [0, -50]);
   const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
 
-  const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
-  const URL = BASE_URL + 'api/v1/blog/all';
-
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(URL);
-        if (!response.ok) {
-          throw new Error('Failed to fetch blogs');
+        if (id) {
+          // Fetch single blog
+          const response = await axiosInstance.get(`/api/v1/blog/${id}`);
+          if (response.data.success) {
+            setCurrentBlog(response.data.blog);
+          } else {
+            throw new Error(response.data.message || 'Failed to fetch blog');
+          }
+        } else {
+          // Fetch all blogs
+          const response = await axiosInstance.get('/api/v1/blog/all');
+          if (response.data.success) {
+            setBlogs(response.data.blogs);
+          } else {
+            throw new Error(response.data.message || 'Failed to fetch blogs');
+          }
         }
-        const data = await response.json();
-        setBlogs(data.blogs);
         setLoading(false);
       } catch (err) {
-        setError(err.message);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch blog data';
+        toast.error(errorMessage);
+        setError(errorMessage);
         setLoading(false);
+        // Redirect to blogs list after error
+        if (id) {
+          setTimeout(() => {
+            navigate('/blog');
+          }, 2000);
+        }
       }
     };
 
-    fetchBlogs();
-  }, []);
+    fetchData();
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -49,6 +71,81 @@ const Blog = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+          <div className="text-white text-xl mb-4">{error}</div>
+          <button
+            onClick={() => navigate('/blog')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
+          >
+            Back to Blogs
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Single Blog View
+  if (id && currentBlog) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+          <div className="container mx-auto px-4 py-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-4xl mx-auto"
+            >
+              <button
+                onClick={() => navigate('/blog')}
+                className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2"
+              >
+                ← Back to Blogs
+              </button>
+              
+              <div className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl overflow-hidden shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
+                {currentBlog.thumbnail && currentBlog.thumbnail.secure_url && (
+                  <img
+                    src={currentBlog.thumbnail.secure_url}
+                    alt={currentBlog.title}
+                    className="w-full h-64 object-cover"
+                  />
+                )}
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold text-white mb-4">
+                    {currentBlog.title}
+                  </h1>
+                  <p className="text-gray-300 text-lg mb-6">
+                    {currentBlog.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      Created: {new Date(currentBlog.createdAt).toLocaleDateString()}
+                    </span>
+                    <motion.a
+                      href={currentBlog.link}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 backdrop-blur-sm"
+                    >
+                      Read Full Article
+                    </motion.a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Blog List View
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -84,7 +181,8 @@ const Blog = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 whileHover={{ scale: 1.02 }}
-                className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20"
+                className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20 cursor-pointer"
+                onClick={() => navigate(`/blog/${blog._id}`)}
               >
                 {blog.thumbnail && blog.thumbnail.secure_url && (
                   <motion.img
@@ -107,22 +205,14 @@ const Blog = () => {
                     <span className="text-xs text-gray-400">
                       Created: {new Date(blog.createdAt).toLocaleDateString()}
                     </span>
-                    <motion.a
-                      href={blog.link}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <motion.button 
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 backdrop-blur-sm"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.4 }}
                     >
-                      <motion.button 
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 backdrop-blur-sm"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.4 }}
-                      >
-                        Read More
-                      </motion.button>
-                    </motion.a>
+                      Read More
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>

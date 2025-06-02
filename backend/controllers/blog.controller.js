@@ -2,6 +2,7 @@ import Blog from '../models/blog.model.js';
 import cloudinary from '../utils/cloudinary.utils.js';
 import fs from 'fs/promises';
 import AppError from '../utils/error.utils.js';
+import mongoose from 'mongoose';
 
 export const createBlog = async (req, res, next) => {
     try {
@@ -90,6 +91,12 @@ export const deleteBlog = async (req, res, next) => {
 export const getBlogById = async (req, res, next) => {
     try {
         const { id } = req.params;
+
+        // Check if ID is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return next(new AppError("Invalid blog ID format", 400));
+        }
+
         const blog = await Blog.findById(id);
 
         if (!blog) {

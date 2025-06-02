@@ -45,6 +45,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/denied" element={<Denied />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<Blog />} />
         <Route path="/verify-email/:token" element={<EmailVerification />} />
         <Route path="/resend-verification" element={<ResendVerification />} />
 
@@ -62,7 +63,7 @@ function App() {
         <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/description" element={<CourseDescription />} />
 
-        <Route element={<RequireAuth allowedRoles={["INSTRUCTOR"]} />}>
+        <Route element={<RequireAuth allowedRoles={["INSTRUCTOR", "ADMIN"]} />}>
           <Route path="/instructor/courses" element={<InstructorDashboard />} />
           <Route path="/course/create" element={<CreateCourse />} />
           <Route path="/course/edit/:courseId" element={<EditCourse />} />
