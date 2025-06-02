@@ -33,6 +33,8 @@ import Blog from "./Pages/Blog";
 import AddBlog from "./Pages/Dashboard/AddBlog";
 import StudentScores from './Pages/Dashboard/StudentScores';
 import ProgressDashboard from './Pages/Dashboard/ProgressDashboard';
+import InstructorDashboard from './Pages/Dashboard/InstructorDashboard';
+import EditCourse from './Pages/Course/EditCourse';
 
 function App() {
   return (
@@ -44,9 +46,9 @@ function App() {
         <Route path="/denied" element={<Denied />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/verify-email/:token" element={<EmailVerification />} />
-       <Route path="/resend-verification" element={<ResendVerification />} />
+        <Route path="/resend-verification" element={<ResendVerification />} />
 
-          <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/user/profile/reset-password"
@@ -60,16 +62,14 @@ function App() {
         <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/description" element={<CourseDescription />} />
 
-        <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
+        <Route element={<RequireAuth allowedRoles={["INSTRUCTOR"]} />}>
+          <Route path="/instructor/courses" element={<InstructorDashboard />} />
           <Route path="/course/create" element={<CreateCourse />} />
+          <Route path="/course/edit/:courseId" element={<EditCourse />} />
           <Route path="/course/addlecture" element={<AddLecture />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/userdata" element={<Userdata />} />
-          <Route path="/admin/addblog" element={<AddBlog />} />
-          <Route path="/admin/users/:userId/edit" element={<AdminUserEdit />} />
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={["USER", "ADMIN"]} />}>
+        <Route element={<RequireAuth allowedRoles={["USER", "ADMIN", "INSTRUCTOR"]} />}>
           <Route path="/user/profile" element={<Profile />} />
           <Route path="/user/profile/change-password" element={<ChangePassword />}/>
           <Route path="/checkout" element={<Checkout />} />
@@ -81,6 +81,10 @@ function App() {
 
         <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
           <Route path="/admin/scores" element={<StudentScores />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/userdata" element={<Userdata />} />
+          <Route path="/admin/addblog" element={<AddBlog />} />
+          <Route path="/admin/users/:userId/edit" element={<AdminUserEdit />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

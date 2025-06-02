@@ -75,7 +75,8 @@ const courseSchema = new Schema({
     instructor: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
     }
 },
     {

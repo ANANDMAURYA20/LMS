@@ -1,11 +1,15 @@
 import { Router } from "express";
-const router = Router();
 import { isLoggedIn, authorisedRoles } from "../middleware/auth.middleware.js";
+import { getInstructorCourses, getInstructorStats } from '../controllers/instructor.controller.js';
 
-// Import controller methods (to be created)
-import { getInstructorCourses } from '../controllers/instructor.controller.js';
+const router = Router();
 
 // Get all courses created by the instructor
-router.get('/courses', isLoggedIn, authorisedRoles('INSTRUCTOR'), getInstructorCourses);
+router.route('/courses')
+    .get(isLoggedIn, authorisedRoles('INSTRUCTOR'), getInstructorCourses);
+
+// Get instructor's statistics
+router.route('/stats')
+    .get(isLoggedIn, authorisedRoles('INSTRUCTOR'), getInstructorStats);
 
 export default router;

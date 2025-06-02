@@ -19,7 +19,7 @@ export default function Signup() {
     password: "",
     number: "",
     avatar: "",
-    role: "USER", // Default role
+    role: "STUDENT", // Default role is now STUDENT
   });
 
   function handleUserInput(e) {
@@ -82,7 +82,7 @@ export default function Signup() {
         password: "",
         number: "",
         avatar: "",
-        role: "USER",
+        role: "STUDENT",
       });
       setPreviewImage("");
       navigate("/login");
@@ -166,7 +166,7 @@ export default function Signup() {
                   onChange={handleUserInput}
                   className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
                 >
-                  <option value="USER">Student</option>
+                  <option value="STUDENT">Student</option>
                   <option value="INSTRUCTOR">Instructor</option>
                 </select>
               </div>

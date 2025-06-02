@@ -9,9 +9,15 @@ import TextArea from "../../Components/InputBox/TextArea";
 import { motion } from "framer-motion";
 import { BsCloudUpload } from "react-icons/bs";
 
+// Add this near the top of the file
+import { useSelector } from "react-redux";
+
 export default function CreateCourse() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Add this line to get the user role
+  const { role } = useSelector((state) => state.auth);
   
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [userInput, setUserInput] = useState({
@@ -22,6 +28,12 @@ export default function CreateCourse() {
     thumbnail: null,
     previewImage: "",
   });
+
+  // Add this useEffect to check role on component mount
+  React.useEffect(() => {
+    console.log('Current user role:', role);
+    console.log('Is logged in:', localStorage.getItem('isLoggedIn'));
+  }, [role]);
 
   function handleImageUpload(e) {
     e.preventDefault();
@@ -68,20 +80,29 @@ export default function CreateCourse() {
     formData.append("category", userInput.category);
     formData.append("createdBy", userInput.createdBy);
     formData.append("thumbnail", userInput.thumbnail);
+    
+    // Add debugging
+    console.log('Submitting course with role:', role);
 
-    const response = await dispatch(createNewCourse(formData));
-    if (response?.payload?.success) {
-      setUserInput({
-        title: "",
-        category: "",
-        createdBy: "",
-        description: "",
-        thumbnail: null,
-        previewImage: "",
-      });
-      navigate("/courses");
+    try {
+      const response = await dispatch(createNewCourse(formData));
+      console.log('Course creation response:', response);
+      if (response?.payload?.success) {
+        setUserInput({
+          title: "",
+          category: "",
+          createdBy: "",
+          description: "",
+          thumbnail: null,
+          previewImage: "",
+        });
+        navigate("/instructor/courses");
+      }
+    } catch (error) {
+      console.error('Course creation error:', error);
+    } finally {
+      setIsCreatingCourse(false);
     }
-    setIsCreatingCourse(false);
   }
 
   return (

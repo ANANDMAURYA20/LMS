@@ -7,6 +7,7 @@ import StatSliceReducer from "./Slices/StatSlice"
 import BlogReducer from './Slices/BlogSlice';
 import scoreReducer from './Slices/ScoreSlice';
 import progressReducer from './Slices/ProgressSlice';
+import InstructorSliceReducer from './Slices/InstructorSlice';
 
  const store = configureStore({
     reducer: {
@@ -17,7 +18,8 @@ import progressReducer from './Slices/ProgressSlice';
         stat: StatSliceReducer,
         blogs: BlogReducer,
         scores: scoreReducer,
-        progress: progressReducer
+        progress: progressReducer,
+        instructor: InstructorSliceReducer
     },
     devTools: true
 })

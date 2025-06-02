@@ -130,7 +130,8 @@ export default function Sidebar({ hideBar = false }) {
             )}
 
 
-            {role === "ADMIN" && (
+            {/* Modified to include INSTRUCTOR role */}
+            {(role === "ADMIN" || role === "INSTRUCTOR") && (
               <li>
                 <Link to="/course/create" className="flex gap-4 items-center">
                   <FaPlus
@@ -141,7 +142,21 @@ export default function Sidebar({ hideBar = false }) {
                 </Link>
               </li>
             )}
-               {role === "ADMIN" && (
+
+            {/* Add instructor courses section */}
+            {role === "INSTRUCTOR" && (
+              <li>
+                <Link to="/instructor/courses" className="flex gap-4 items-center">
+                  <FaList
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  My Courses
+                </Link>
+              </li>
+            )}
+
+            {role === "ADMIN" && (
               <li>
                 <Link to="/admin/addblog" className="flex gap-4 items-center">
                   <FaPlus
@@ -198,13 +213,13 @@ export default function Sidebar({ hideBar = false }) {
                     onClick={onLogout}
                     disabled={isLoading}
                   >
-                    <Link>{isLoading ? "Logout..." : "Logout"}</Link>
+                    Logout
                   </button>
                 </div>
               </li>
             ) : (
               <li className="absolute bottom-4 w-[90%]">
-                <div className="w-full flex items-center justify-center">
+                <div className="w-full flex md:flex-row flex-col gap-2 items-center justify-center">
                   <button className="btn-primary px-3.5 py-2.5 font-semibold rounded-md w-full">
                     <Link to="/login">Login</Link>
                   </button>
@@ -218,6 +233,8 @@ export default function Sidebar({ hideBar = false }) {
         </div>
       </div>
     );
+  } else {
+    return <></>;
   }
 }
 
