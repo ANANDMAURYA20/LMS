@@ -78,7 +78,7 @@ export default function Checkout() {
       const options = {
         key: rzorpayKey,
         subscription_id: subscription_id,
-        name: "Lyceum",
+        name: "Subscribe to AI-Tutor",
         description: "Subscription Bundle Purchase",
         theme: {
           color: "#F4BF1E",

@@ -10,7 +10,10 @@ import miscellaneousRoutes from './routes/miscellaneous.routes.js';
 import express from 'express';
 import connectToDb from './config/db.config.js';
 import errorMiddleware from './middleware/error.middleware.js';
-import blogRoutes from './routes/blog.routes.js'
+import blogRoutes from './routes/blog.routes.js';
+import aiRoutes from './routes/ai.routes.js';
+import scoreRoutes from './routes/score.routes.js';
+import instructorRoutes from './routes/instructor.routes.js';
 
 const app = express();
 
@@ -30,9 +33,12 @@ app.use(cors({
 
 app.use('/api/v1/user', userRoutes); 
 app.use('/api/v1/courses', courseRoutes); 
+app.use('/api/v1/instructor', instructorRoutes); // Add instructor routes
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/', miscellaneousRoutes);
+app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/scores', scoreRoutes);
 
  
 
@@ -50,3 +56,6 @@ app.use(errorMiddleware);
 connectToDb();
 
 export default app;
+
+
+

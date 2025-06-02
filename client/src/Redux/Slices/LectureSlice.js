@@ -49,7 +49,14 @@ export const deleteCourseLecture = createAsyncThunk("/api/v1/courses/lecture/del
 const lectureSlice = createSlice({
     name: 'lecture',
     initialState,
-    reducers: {},
+    reducers: {
+        updateLectureQuestions: (state, action) => {
+            const { lectureIndex, questions } = action.payload;
+            if (state.lectures[lectureIndex]) {
+                state.lectures[lectureIndex].questions = questions;
+            }
+        },
+    },
     extraReducers: (builder) => {
 
         // for get Course Lectures
@@ -64,4 +71,5 @@ const lectureSlice = createSlice({
     }
 })
 
+export const { updateLectureQuestions } = lectureSlice.actions;
 export default lectureSlice.reducer

@@ -18,9 +18,7 @@ const cookieOptions = {
 // Register  
 const register = async (req, res, next) => {
     try {
-
-        
-        const { fullName, email, password,number } = req.body;
+        const { fullName, email, password, number, role } = req.body;
 
         // Check if user misses any fields
         if (!fullName || !email || !password || !number) {
@@ -33,12 +31,16 @@ const register = async (req, res, next) => {
             return next(new AppError("Email already exists, please login", 400));
         }
 
+        // Validate role if provided
+        const validRole = role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'USER';
+
         // Save user in the database and log the user in
         const user = await userModel.create({
             fullName,
             email,
             password,
             number,
+            role: validRole, // Set the role based on input
             avatar: {
                 public_id: email,
                 secure_url: "",
@@ -111,8 +113,6 @@ const register = async (req, res, next) => {
     catch (e) {
         return next(new AppError(e.message, 500));
     }
-
-
 };
 
 const verifyEmail = async (req, res, next) => {

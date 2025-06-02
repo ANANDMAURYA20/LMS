@@ -4,9 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getCourseLectures,
   deleteCourseLecture,
+  updateLectureQuestions
 } from "../../Redux/Slices/LectureSlice";
 import Layout from "../../Layout/Layout";
 import toast from "react-hot-toast";
+import { axiosInstance } from '../../Helpers/axiosInstance';
+import ChatBot from "../../components/ChatBot"; // Import the ChatBot component
 
 export default function DisplayLecture() {
   const navigate = useNavigate();
@@ -51,7 +54,7 @@ export default function DisplayLecture() {
     });
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => {
     const currentQuestions = lectures[currentVideo]?.questions || [];
     
     // Check if all questions are answered
@@ -60,12 +63,11 @@ export default function DisplayLecture() {
     );
 
     if (unansweredQuestions.length > 0) {
-      toast.error(`Please answer all questions before submitting. ${unansweredQuestions.length} question${unansweredQuestions.length > 1 ? 's' : ''} remaining.`);
+      toast.error(`Please answer all questions before submitting.`);
       return;
     }
     
     let correctAnswers = 0;
-    
     currentQuestions.forEach((question, index) => {
       if (selectedAnswers[index] === question.correctOption) {
         correctAnswers++;
@@ -75,7 +77,57 @@ export default function DisplayLecture() {
     const percentage = (correctAnswers / currentQuestions.length) * 100;
     setScore(percentage);
     setShowResults(true);
-    toast.success('Quiz submitted successfully!');
+
+    // Save score to backend
+    try {
+      const response = await axiosInstance.post('/api/v1/scores', {
+        courseId: state._id,
+        lectureId: lectures[currentVideo]._id,
+        score: percentage,
+        questionsAttempted: currentQuestions.length,
+        correctAnswers
+      });
+
+      if (response.data.success) {
+        toast.success('Quiz submitted and score saved successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to save score');
+      console.error('Score saving error:', error);
+    }
+  };
+
+  const handleGenerateAIQuestions = async () => {
+    if (score < 60) {
+      try {
+        const loadingId = toast.loading("Generating new practice questions...");
+        
+        const response = await axiosInstance.post('/api/v1/ai/generate-questions', {
+          score: score,
+          lectureTitle: lectures[currentVideo]?.title
+        });
+        
+        if (response.data.success && response.data.questions) {
+          // Create a new action to update the questions
+          dispatch(updateLectureQuestions({
+            lectureIndex: currentVideo,
+            questions: response.data.questions
+          }));
+          
+          // Reset quiz state
+          setSelectedAnswers({});
+          setShowResults(false);
+          setScore(0);
+          
+          toast.success("New practice questions generated!", { id: loadingId });
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Error generating questions:', error);
+        toast.error(error.response?.data?.message || "Failed to generate new questions");
+      }
+    }
   };
 
   const handleRetakeQuiz = () => {
@@ -253,6 +305,18 @@ export default function DisplayLecture() {
                     <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">
                       Your Score: {score.toFixed(1)}%
                     </p>
+                    
+                    {showResults && score < 60 && (
+                      
+                      <button
+                        onClick={handleGenerateAIQuestions}
+                        className="mt-4 px-6 py-2 rounded-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors"
+                      >
+                        Generate Practice Questions
+                      </button>
+                      
+                    )}
+                    <p>Don't worry AI will help you to make you better</p>
                   </div>
                 )}
                 
@@ -274,7 +338,18 @@ export default function DisplayLecture() {
             </p>
           )}
         </div>
+        
+        {/* Add the ChatBot component */}
+        <ChatBot lectureTitle={lectures && lectures[currentVideo]?.title} />
       </section>
     </Layout>
   );
 }
+
+
+
+
+
+
+
+

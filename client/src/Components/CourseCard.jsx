@@ -1,48 +1,53 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlay, FaBook, FaUser } from "react-icons/fa";
+import { FaPlay } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 export default function CourseCard({ data }) {
   const navigate = useNavigate();
- 
 
   return (
-    <div 
-      className="md:w-[22rem] w-[95%] md:h-[445px] h-[500px] shadow-custom dark:shadow-lg rounded-lg cursor-pointer group overflow-hidden bg-white dark:bg-zinc-700 transition-transform transform hover:scale-[1.01]"
-    onClick={() => navigate("/courses/description/", {state: {...data}})}
+    <motion.div
+      className="h-full flex flex-col cursor-pointer bg-white/5 dark:bg-gray-800/40 rounded-lg overflow-hidden border border-white/10 hover:border-blue-400/30 transition-all duration-300"
+      onClick={() => navigate("/courses/description/", { state: { ...data } })}
     >
-      <div className="relative overflow-hidden">
+      {/* Thumbnail Section */}
+      <div className="relative w-full h-48 md:h-56 lg:h-48 xl:h-56">
         <img
-          className="h-48 w-full rounded-tl-lg rounded-tr-lg group-hover:scale-[1.05] transition-all ease-in-out duration-300"
+          className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-110"
           src={data?.thumbnail?.secure_url}
           alt="course thumbnail"
+          loading="lazy"
         />
-        <div className="absolute top-2 right-2 p-2 bg-white dark:bg-zinc-700 rounded-full">
-          <FaPlay className="text-yellow-500 dark:text-yellow-400 text-xl" />
+        <div className="absolute inset-0 bg-black/20 hover:bg-black/10 transition-colors duration-300" />
+        <div className="absolute top-2 right-2 p-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+          <FaPlay className="text-white text-xs" />
         </div>
       </div>
-      <div className="p-4 md:space-y-2 space-y-3 text-gray-800 dark:text-white">
-        <h2 className="text-2xl font-semibold line-clamp-2">{data?.title}</h2>
-        <p className="line-clamp-2 font-nunito-sans text-base font-[500]">
+
+      {/* Content Section */}
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">
+          {data?.title}
+        </h3>
+        
+        <p className="text-gray-300 text-sm mb-4 line-clamp-2">
           {data?.description}
         </p>
-        <div className="flex items-center space-x-2">
-          <FaBook className="text-yellow-500 dark:text-yellow-400" />
-          <p className="text-base font-semibold">Category: {data?.category}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <FaBook className="text-yellow-500 dark:text-yellow-400" />
-          <p className="text-base font-semibold">
-            Total lectures: {data?.numberoflectures}
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <FaUser className="text-yellow-500 dark:text-yellow-400" />
-          <p className="text-base font-semibold">
-            Instructor: {data?.createdBy}
-          </p>
+
+        <div className="mt-auto">
+          <div className="flex items-center justify-between text-xs md:text-sm text-gray-300">
+            <span className="flex items-center">
+              <span className="mr-1">By</span>
+              <span className="text-blue-400">{data?.createdBy}</span>
+            </span>
+            <span className="bg-blue-500/20 px-2 py-0.5 rounded-full text-blue-300">
+              {data?.category}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
+

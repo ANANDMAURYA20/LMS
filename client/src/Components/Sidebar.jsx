@@ -11,7 +11,9 @@ import {
   FaList,
   FaInfoCircle,
   FaPhone,
-  FaBlog
+  FaBlog,
+  FaGraduationCap,
+  FaBrain,
 } from "react-icons/fa";
 
 export default function Sidebar({ hideBar = false }) {
@@ -73,6 +75,15 @@ export default function Sidebar({ hideBar = false }) {
                   className="text-gray-500 dark:text-slate-100"
                 />
                 Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/user/progress" className="flex gap-4 items-center">
+              <FaBrain
+                  size={18}
+                  className="text-gray-500 dark:text-slate-100"
+                />
+                Progress Report
               </Link>
             </li>
             <li>
@@ -164,6 +175,18 @@ export default function Sidebar({ hideBar = false }) {
               </Link>
             </li>
 
+            {role === "ADMIN" && (
+              <li>
+                <Link to="/admin/scores" className="flex gap-4 items-center">
+                  <FaGraduationCap
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  Student Scores
+                </Link>
+              </li>
+            )}
+
             {isLoggedIn ? (
               <li className="absolute bottom-4 w-[90%]">
                 <div className="w-full flex md:flex-row flex-col gap-2 items-center justify-center">
@@ -197,3 +220,5 @@ export default function Sidebar({ hideBar = false }) {
     );
   }
 }
+
+

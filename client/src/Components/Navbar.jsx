@@ -14,13 +14,13 @@ export default function Navbar() {
 
   useEffect(() => {
     const element = document.querySelector("html");
-    element.classList.remove("light", "dark");
+    element.classList.remove("dark", "dark");
     if (darkMode) {
       element.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
-      element.classList.add("light");
-      localStorage.setItem("theme", "light");
+      element.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     }
   }, [darkMode]);
 
@@ -30,9 +30,8 @@ export default function Navbar() {
 <nav className="sticky top-0 z-50 md:h-[72px] h-[65px] md:px-[35px] px-[15px] bg-[#ffffffd0] dark:bg-[#21242bc5] shadow-custom backdrop-blur-md flex justify-between">
   <h1 className="text-lg font-bold text-gray-900 dark:text-white self-center pl-10 mb-2"></h1>
   <Link to={"/"}>
-  {/* <img src={logo} alt="" className="w-32 h-4/5 pt-5"/> */}
   </Link>
-  <button className="p-5 rounded-full text-lg font-semibold">
+  {/* <button className="p-5 rounded-full text-lg font-semibold">
     {darkMode ? (
       <FaSun size={26} className="text-white" onClick={toggleDarkMode} />
     ) : (
@@ -42,7 +41,7 @@ export default function Navbar() {
         onClick={toggleDarkMode}
       />                                        
     )}
-  </button>
+  </button> */}
 </nav>
   );
 }

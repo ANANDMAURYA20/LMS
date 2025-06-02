@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import aboutMainImage from "../assets/images/about.png";
 import CarouselSlide from "../Components/CarouselSlide";
 import { celebrities } from "../Constants/CelebrityData";
@@ -8,59 +9,125 @@ import "slick-carousel/slick/slick-theme.css";
 import Layout from "../Layout/Layout";
 
 function AboutUs() {
-      const settings = {
-        dots: true,
-        screenY: true,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        lazyLoading: true,
-        autoplay: true,
-        speed: 500,
-      };
+  const { scrollYProgress } = useScroll();
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const opacity1 = useTransform(scrollYProgress, [0, 0.5], [1, 0.5]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    lazyLoading: true,
+    autoplay: true,
+    speed: 500,
+    autoplaySpeed: 3000,
+    cssEase: "linear",
+    pauseOnHover: true
+  };
       
   return (
     <Layout>
-      <section className="md:py-10 py-7 mb-10 text-white overflow-x-hidden  md:px-16 px-6 min-h-[100vh]">
-      {/* <a href="https://wa.me/+916394499123 " target="_blank" rel="noopener noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" alt="WhatsApp" className="fixed bottom-5 right-5 md:w-10 md:h-10 w-8 h-8 z-50" />
-</a> */}
-        {/* hero */}
-        <div className="flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 w-full space-y-7">
-          <div className="md:w-1/2 w-full space-y-7">
-            <h1 className="text-5xl text-yellow-500 font-semibold font-inter">
-              Affordable and <span className="font-nunito-sans">quality education</span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-200 font-nunito-sans">
-              Our goal is to provide the afoordable and quality education to the
-              world. We are providing the platform for the aspiring teachers and
-              students to share their skills, creativity and knowledge to each
-              other to empower and contribute in the growth and wellness of
-              mankind.
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <motion.section 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="container mx-auto px-4 py-12 lg:px-20"
+        >
+          {/* Hero Section */}
+          <motion.div 
+            style={{ y: y1, opacity: opacity1 }}
+            className="flex md:flex-row flex-col-reverse items-center justify-center md:gap-10 gap-7 mb-20"
+          >
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="md:w-1/2 w-full space-y-7"
+            >
+              <motion.h1 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-5xl font-semibold font-inter"
+              >
+                <span className="text-yellow-500">Affordable and</span>{" "}
+                <span className="text-white font-nunito-sans">quality education</span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="text-xl text-gray-300 font-nunito-sans backdrop-blur-lg bg-white/5 dark:bg-gray-800/30 rounded-xl p-6 border border-white/10"
+              >
+                Our goal is to provide affordable and quality education to the
+                world. We are providing the platform for aspiring teachers and
+                students to share their skills, creativity and knowledge with each
+                other to empower and contribute to the growth and wellness of
+                mankind.
+              </motion.p>
+            </motion.div>
 
-          <div className="md:w-1/2 w-1/7 flex items-center justify-center">
-            <img
-              style={{
-                filter: "drop-shadow(0px 15px 10px rgb(0,0,0));",
-              }}
-              alt="about main image"
-              className="drop-shadow-2xl"
-              src={aboutMainImage}
-            />
-          </div>
-        </div>
+            <motion.div 
+              style={{ scale }}
+              className="md:w-1/2 w-full flex items-center justify-center"
+            >
+              <motion.img
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                src={aboutMainImage}
+                alt="about main image"
+                className="drop-shadow-2xl rounded-2xl backdrop-blur-lg"
+                style={{
+                  filter: "drop-shadow(0px 15px 10px rgb(0,0,0))",
+                }}
+              />
+            </motion.div>
+          </motion.div>
 
-        {/* slider */}
-
-        <div className="w-[90vw] px-0 pt-7 mt-10 rounded-lg bg-[#dc85ffb4] dark:bg-[#393d4e93] backdrop-blur-lg md:h-[350px] h-[550px] ">
-          <Slider {...settings} className="h-full">
-            {celebrities.map((details, index) => (
-              <CarouselSlide details={details} key={index} />
-            ))}
-          </Slider>
-        </div>
-      </section>
+          {/* Carousel Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="w-full mt-20"
+          >
+            <motion.div 
+              className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20"
+            >
+              <motion.h2 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-3xl font-semibold text-white text-center mb-8"
+              >
+                What People Say About Us
+              </motion.h2>
+              
+              <div className="w-full md:h-[350px] h-[550px]">
+                <Slider {...settings} className="h-full">
+                  {celebrities.map((details, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <CarouselSlide details={details} />
+                    </motion.div>
+                  ))}
+                </Slider>
+              </div>
+            </motion.div>
+          </motion.div>
+        </motion.section>
+      </div>
     </Layout>
   );
 }

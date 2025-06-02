@@ -1,23 +1,29 @@
-import { useRef, useState,useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { addBlog,deleteBlog } from "../../Redux/Slices/BlogSlice";
+import { addBlog, deleteBlog } from "../../Redux/Slices/BlogSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import InputBox from "../../Components/InputBox/InputBox";
 import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import { BsCloudUpload } from "react-icons/bs";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function AddBlog() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { scrollYProgress } = useScroll();
+  
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const opacity1 = useTransform(scrollYProgress, [0, 0.5], [1, 0.5]);
 
   const [isLoading, setIsLoading] = useState(false);
   const thumbnailRef = useRef(null);
   const [userInput, setUserInput] = useState({
     title: "",
     description: "",
-    link:"",
+    link: "",
     thumbnail: undefined,
     thumbnailSrc: "",
   });
@@ -42,18 +48,12 @@ export default function AddBlog() {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    if (
-        !userInput.thumbnail ||
-        !userInput.title ||
-        !userInput.link ||
-        !userInput.description
-    ) {
-        toast.error("All fields are mandatory");
-        return;
+    if (!userInput.thumbnail || !userInput.title || !userInput.link || !userInput.description) {
+      toast.error("All fields are mandatory");
+      return;
     }
 
     setIsLoading(true);
-
     const formData = new FormData();
     formData.append("thumbnail", userInput.thumbnail);
     formData.append("title", userInput.title);
@@ -61,202 +61,171 @@ export default function AddBlog() {
     formData.append("description", userInput.description);
 
     try {
-        const response = await dispatch(addBlog(formData)).unwrap();
-        
-        toast.success("Blog created successfully");
-        navigate(0);
-        
-        // Reset form
-        setUserInput({
-            title: "",
-            description: "",
-            link:"",
-            thumbnail: undefined,
-            thumbnailSrc: "",
-        });
+      const response = await dispatch(addBlog(formData)).unwrap();
+      toast.success("Blog created successfully");
+      navigate(0);
+      setUserInput({
+        title: "",
+        description: "",
+        link: "",
+        thumbnail: undefined,
+        thumbnailSrc: "",
+      });
     } catch (error) {
-        console.error("Blog creation error:", error);
-        toast.error(error?.message || "Failed to create blog");
+      console.error("Blog creation error:", error);
+      toast.error(error?.message || "Failed to create blog");
     } finally {
-        setIsLoading(false);
-    }
-}
-
-const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
-  const URL = BASE_URL+ 'api/v1/blog/all'
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await fetch(URL);
-        if (!response.ok) {
-          throw new Error('Failed to fetch blogs');
-        }
-        const data = await response.json();
-        setBlogs(data.blogs);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchBlogs();
-  }, []);
-  async function onBlogDelete(id) {
-    if (window.confirm("Are you sure you want to delete this blog?")) {
-      try {
-        const res = await dispatch(deleteBlog(id));
-        
-        if (res?.payload?.success) {
-          setBlogs(blogs.filter(blog => blog._id !== id));
-          toast.success("Blog deleted successfully");
-       navigate(-1);
-        }
-      } catch (error) {
-        console.error("Failed to delete blog:", error);
-        toast.error("Failed to delete blog");
-      }
+      setIsLoading(false);
     }
   }
 
   return (
     <Layout>
-      <section className="flex flex-col gap-6 items-center py-8 px-3 min-h-[100vh]">
-        <form
-          onSubmit={onFormSubmit}
-          autoComplete="off"
-          noValidate
-          className="flex flex-col dark:bg-base-100 gap-7 rounded-lg md:py-5 py-7 md:px-7 px-3 md:w-[750px] w-full shadow-custom dark:shadow-xl"
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-4xl"
         >
-          <header className="flex items-center justify-center relative">
-            <button
-              className="absolute left-2 text-xl text-green-500"
-              onClick={() => navigate(-1)}
+          <div className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-center mb-8"
             >
-              <AiOutlineArrowLeft />
-            </button>
-            <h1 className="text-center dark:text-purple-500 md:text-4xl text-2xl font-bold font-inter">
-              Add New Blog
-            </h1>
-          </header>
-          <div className="w-full flex md:flex-row md:justify-between justify-center flex-col md:gap-0 gap-5">
-            <div className="md:w-[48%] w-full flex flex-col gap-5">
-              {/* Thumbnail */}
-              <div className="border border-gray-300 h-[200px] flex justify-center cursor-pointer">
-                {userInput.thumbnailSrc && (
-                  <img
-                    src={userInput.thumbnailSrc}
-                    alt="Thumbnail Preview"
-                    className="object-fill w-full"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      thumbnailRef.current.click();
-                    }}
-                  />
-                )}
-                {!userInput.thumbnailSrc && (
-                  <label
-                    className="font-[500] text-xl h-full w-full flex justify-center items-center cursor-pointer font-lato"
-                    htmlFor="thumbnail"
-                  >
-                    Choose Thumbnail
-                  </label>
-                )}
-                <input
-                  type="file"
-                  className="hidden"
-                  id="thumbnail"
-                  ref={thumbnailRef}
-                  name="thumbnail"
-                  onChange={handleThumbnail}
-                  accept="image/*"
-                />
+              <div className="flex items-center justify-center relative">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="absolute left-0 text-xl text-white/80 hover:text-white transition-colors duration-300"
+                  onClick={() => navigate(-1)}
+                >
+                  <AiOutlineArrowLeft />
+                </motion.button>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  Create New Blog
+                </h1>
               </div>
-            </div>
-            <div className="md:w-[48%] w-full flex flex-col gap-5">
-              {/* Title */}
-              <InputBox
-                label={"Title"}
-                name={"title"}
-                type={"text"}
-                placeholder={"Enter Blog Title"}
-                onChange={handleInputChange}
-                value={userInput.title}
-              />
-              {/* Link */}
-              <InputBox
-                label={"Link"}
-                name={"link"}
-                type={"text"}
-                placeholder={"Enter Blog Link"}
-                onChange={handleInputChange}
-                value={userInput.link}
-              />
-              {/* Description */}
-              <TextArea
-                label={"Description"}
-                name={"description"}
-                rows={5}
-                type={"text"}
-                placeholder={"Enter Blog Description"}
-                onChange={handleInputChange}
-                value={userInput.description}
-              />
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="mt-3 bg-yellow-500 text-white dark:text-base-200  transition-all ease-in-out duration-300 rounded-md py-2 font-nunito-sans font-[500] text-lg cursor-pointer"
-          >
-            {isLoading ? "Adding Blog..." : "Add New Blog"}
-          </button>
-        </form>
-      </section>
-      <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {blogs.map((blog) => (
-          <div 
-          key={blog._id} 
-            className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
-            >
-            {blog.thumbnail && blog.thumbnail.secure_url && (
-              <img 
-                src={blog.thumbnail.secure_url} 
-                alt={blog.title} 
-                className="w-full h-48 object-cover"
-                />
-            )}
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                {blog.title}
-              </h2>
-              <p className="text-gray-600 text-sm mb-4">
-                {blog.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  Created: {new Date(blog.createdAt).toLocaleDateString()}
-                </span>
-                <button 
-                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full hover:bg-blue-600 transition-colors"
-                  onClick={() => onBlogDelete(blog._id)} 
+            <form onSubmit={onFormSubmit} className="space-y-6" noValidate>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  {/* Thumbnail Upload */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="border-2 border-dashed border-blue-400/50 rounded-xl p-4 text-center"
                   >
-                  Delet blog
-                </button>
+                    <label
+                      htmlFor="thumbnail"
+                      className="cursor-pointer block"
+                    >
+                      {userInput.thumbnailSrc ? (
+                        <img
+                          className="w-full h-48 object-cover rounded-lg"
+                          src={userInput.thumbnailSrc}
+                          alt="Preview"
+                        />
+                      ) : (
+                        <div className="h-48 flex flex-col items-center justify-center text-gray-300">
+                          <BsCloudUpload className="text-4xl mb-2" />
+                          <span className="text-sm">
+                            Click to upload blog thumbnail
+                          </span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        id="thumbnail"
+                        ref={thumbnailRef}
+                        onChange={handleThumbnail}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                    </label>
+                  </motion.div>
+
+                  {/* Title Input */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <InputBox
+                      label="Blog Title"
+                      name="title"
+                      type="text"
+                      placeholder="Enter blog title"
+                      onChange={handleInputChange}
+                      value={userInput.title}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-400"
+                    />
+                  </motion.div>
+
+                  {/* Link Input */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                  >
+                    <InputBox
+                      label="Blog Link"
+                      name="link"
+                      type="text"
+                      placeholder="Enter blog link"
+                      onChange={handleInputChange}
+                      value={userInput.link}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-400"
+                    />
+                  </motion.div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Description Input */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                  >
+                    <TextArea
+                      label="Blog Description"
+                      name="description"
+                      rows={8}
+                      placeholder="Enter blog description"
+                      onChange={handleInputChange}
+                      value={userInput.description}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-400"
+                    />
+                  </motion.div>
+                </div>
               </div>
-            </div>
+
+              {/* Submit Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 font-medium backdrop-blur-sm mt-6"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Blog...
+                  </span>
+                ) : (
+                  "Create Blog"
+                )}
+              </motion.button>
+            </form>
           </div>
-        ))}
+        </motion.div>
       </div>
-    </div>
     </Layout>
   );
 }

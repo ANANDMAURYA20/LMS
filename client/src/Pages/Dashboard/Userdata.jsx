@@ -5,6 +5,7 @@ import Layout from "../../Layout/Layout";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaEdit, FaUserCircle } from "react-icons/fa";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 function Userdata() {
   const dispatch = useDispatch();
@@ -12,6 +13,15 @@ function Userdata() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const { role } = useSelector((state) => state.auth);
+  const { scrollYProgress } = useScroll();
+  
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -25]);
+  const opacity1 = useTransform(scrollYProgress, [0, 0.8], [1, 0.7]);
+
+  // Add handleEdit function
+  const handleEdit = (userId) => {
+    navigate(`/admin/users/${userId}/edit`);
+  };
 
   useEffect(() => {
     async function fetchUsers() {
@@ -37,15 +47,16 @@ function Userdata() {
     }
   }, [dispatch, navigate, role]);
 
-  const handleEdit = (userId) => {
-    navigate(`/admin/users/${userId}/edit`);
-  };
-
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"
+          />
         </div>
       </Layout>
     );
@@ -53,113 +64,132 @@ function Userdata() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+      <div className="min-h-[90vh] bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 md:p-8">
+        <motion.div 
+          style={{ y: y1, opacity: opacity1 }}
+          className="max-w-[1600px] mx-auto"
+        >
+          <motion.div 
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex justify-between items-center mb-8"
+          >
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
               Registered Users
             </h1>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="text-xl md:text-2xl text-blue-300 backdrop-blur-sm bg-white/10 px-6 py-3 rounded-lg"
+            >
               Total Users: {users.length}
-            </div>
-          </div>
-          {console.log(users)}
+            </motion.div>
+          </motion.div>
 
-          <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-            <table className="min-w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="overflow-x-auto backdrop-blur-lg bg-white/10 rounded-xl shadow-[0_4px_16px_0_rgba(31,38,135,0.37)] border border-white/20"
+          >
+            <table className="w-full">
+              <thead className="backdrop-blur-sm bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Phone
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Verfication
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Subscription
-                  </th>
-                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Password
-                  </th> */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">User</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Email</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Phone</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Verification</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Role</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Subscription</th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-gray-200">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+              <tbody className="divide-y divide-white/10">
+                {users.map((user, index) => (
+                  <motion.tr 
+                    key={user._id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="hover:bg-white/5 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }}
+                          className="h-12 w-12 flex-shrink-0"
+                        >
                           {user.avatar?.secure_url ? (
                             <img
-                              className="h-10 w-10 rounded-full object-cover"
+                              className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
                               src={user.avatar.secure_url}
                               alt={user.fullName}
                             />
                           ) : (
-                            <FaUserCircle className="h-10 w-10 text-gray-400" />
+                            <FaUserCircle className="h-12 w-12 text-blue-400" />
                           )}
-                        </div>
+                        </motion.div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-lg font-medium text-gray-200">
                             {user.fullName}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {user.number || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {user.isEmailVerified == true ? "Verified 🟩" : "Not Verified 🔴"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${user.role === "ADMIN" 
-                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" 
-                          : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${user.subscription?.status === "active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"}`}>
-                        {user.subscription?.status || "inactive"}
-                      </span>
-                    </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {user.password}
-                    </td> */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(user._id)}
-                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    <td className="px-6 py-4 text-lg text-gray-300">{user.email}</td>
+                    <td className="px-6 py-4 text-lg text-gray-300">{user.number || "N/A"}</td>
+                    <td className="px-6 py-4">
+                      <motion.span
+                        whileHover={{ scale: 1.02 }}
+                        className={`px-4 py-2 rounded-full text-base font-medium ${
+                          user.isEmailVerified
+                            ? "bg-green-500/20 text-green-300"
+                            : "bg-red-500/20 text-red-300"
+                        }`}
                       >
-                        <FaEdit className="h-5 w-5" />
-                      </button>
+                        {user.isEmailVerified ? "Verified" : "Not Verified"}
+                      </motion.span>
                     </td>
-                  </tr>
+                    <td className="px-6 py-4">
+                      <motion.span
+                        whileHover={{ scale: 1.02 }}
+                        className={`px-4 py-2 rounded-full text-base font-medium ${
+                          user.role === "ADMIN"
+                            ? "bg-purple-500/20 text-purple-300"
+                            : "bg-blue-500/20 text-blue-300"
+                        }`}
+                      >
+                        {user.role}
+                      </motion.span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <motion.span
+                        whileHover={{ scale: 1.02 }}
+                        className={`px-4 py-2 rounded-full text-base font-medium ${
+                          user.subscription?.status === "active"
+                            ? "bg-green-500/20 text-green-300"
+                            : "bg-red-500/20 text-red-300"
+                        }`}
+                      >
+                        {user.subscription?.status || "inactive"}
+                      </motion.span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleEdit(user._id)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                      >
+                        <FaEdit className="h-6 w-6" />
+                      </motion.button>
+                    </td>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </Layout>
   );

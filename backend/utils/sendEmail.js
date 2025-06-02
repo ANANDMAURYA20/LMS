@@ -16,7 +16,7 @@ const sendEmail = async function (email, subject, message) {
 
   // send mail with defined transport object
   await transporter.sendMail({
-    from: `Lyceum PVT. LTD. <${process.env.SMTP_FROM_EMAIL}>`, // sender address
+    from: `AI- Tutor <${process.env.SMTP_FROM_EMAIL}>`, // sender address
     to: email, // user email
     subject: subject, // Subject line
     text: message, // html body

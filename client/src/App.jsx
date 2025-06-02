@@ -31,6 +31,8 @@ import AdminUserEdit from "./Pages/Dashboard/AdminUserEdit";
 
 import Blog from "./Pages/Blog";
 import AddBlog from "./Pages/Dashboard/AddBlog";
+import StudentScores from './Pages/Dashboard/StudentScores';
+import ProgressDashboard from './Pages/Dashboard/ProgressDashboard';
 
 function App() {
   return (
@@ -38,9 +40,9 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutUs />} />
-        {/* <Route path="/contact" element={<Contact />} /> */}
+        <Route path="/contact" element={<Contact />} />
         <Route path="/denied" element={<Denied />} />
-        {/* <Route path="/blog" element={<Blog />} /> */}
+        <Route path="/blog" element={<Blog />} />
         <Route path="/verify-email/:token" element={<EmailVerification />} />
        <Route path="/resend-verification" element={<ResendVerification />} />
 
@@ -55,9 +57,9 @@ function App() {
           element={<ResetPassword />}
         />
 
-        {/* <Route path="/courses" element={<CourseList />} /> */}
-        {/* <Route path="/courses/description" element={<CourseDescription />} /> */}
-{/* 
+        <Route path="/courses" element={<CourseList />} />
+        <Route path="/courses/description" element={<CourseDescription />} />
+
         <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
           <Route path="/course/create" element={<CreateCourse />} />
           <Route path="/course/addlecture" element={<AddLecture />} />
@@ -65,16 +67,21 @@ function App() {
           <Route path="/admin/userdata" element={<Userdata />} />
           <Route path="/admin/addblog" element={<AddBlog />} />
           <Route path="/admin/users/:userId/edit" element={<AdminUserEdit />} />
-        </Route> */}
+        </Route>
 
-        {/* <Route element={<RequireAuth allowedRoles={["USER", "ADMIN"]} />}>
+        <Route element={<RequireAuth allowedRoles={["USER", "ADMIN"]} />}>
           <Route path="/user/profile" element={<Profile />} />
           <Route path="/user/profile/change-password" element={<ChangePassword />}/>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
           <Route path="/checkout/fail" element={<CheckoutFail />} />
           <Route path="/course/displaylectures" element={<DisplayLecture />} />
-        </Route> */}
+          <Route path="/user/progress" element={<ProgressDashboard />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
+          <Route path="/admin/scores" element={<StudentScores />} />
+        </Route>
 
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -83,3 +90,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
+

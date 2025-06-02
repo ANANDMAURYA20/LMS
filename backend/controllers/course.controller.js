@@ -51,11 +51,12 @@ const createCourse = async (req, res, next) => {
             title,
             description,
             category,
-            createdBy
+            createdBy,
+            instructor: req.user.id // Associate course with the instructor
         })
 
         if (!course) {
-            return next(new AppError('Course could not created, please try again', 500));
+            return next(new AppError('Course could not be created, please try again', 500));
         }
 
         // file upload
