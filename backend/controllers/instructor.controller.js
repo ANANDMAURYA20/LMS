@@ -1,6 +1,7 @@
 import Course from "../models/course.model.js";
 import CourseRequest from "../models/courseRequest.model.js";
 import AppError from "../utils/error.utils.js";
+import cloudinary from "cloudinary";
 
 // Get all courses created by the instructor
 export const getInstructorCourses = async (req, res, next) => {
@@ -193,7 +194,15 @@ export const getInstructorStats = async (req, res, next) => {
 export const createCourseRequest = async (req, res, next) => {
   try {
     const { title, description, category } = req.body;
-    const thumbnail = req.file;
+    const file = req.file;
+    if (!file) {
+      return next(new AppError("Please upload thumbnail", 400));
+    }
+
+    // Upload file to Cloudinary
+    const result = await cloudinary.v2.uploader.upload(file.path, {
+      folder: "course_thumbnails",
+    });
 
     // Validate required fields
     if (!title || !description || !category) {
@@ -206,12 +215,7 @@ export const createCourseRequest = async (req, res, next) => {
       description,
       category,
       instructor: req.user.id,
-      thumbnail: thumbnail
-        ? {
-            public_id: thumbnail.public_id,
-            secure_url: thumbnail.secure_url,
-          }
-        : undefined,
+      thumbnail: result.secure_url,
       status: "pending",
     });
 

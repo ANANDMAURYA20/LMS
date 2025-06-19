@@ -184,9 +184,9 @@ export const getLectureApprovalStatus = async (req, res, next) => {
 // Get all pending course requests
 export const getPendingCourseRequests = async (req, res, next) => {
     try {
-        const pendingRequests = await CourseRequest.find({ status: 'PENDING' })
-            .populate('instructor', 'name email')
-            .select('title description category thumbnail createdAt');
+        const pendingRequests = await CourseRequest.find({ status: "pending" })
+          .populate("instructor", "name email")
+          .select("title description category thumbnail createdAt");
 
         res.status(200).json({
             success: true,

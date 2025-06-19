@@ -129,112 +129,119 @@ function CourseRequestForm() {
     };
 
     return (
-        <Layout>
-            <div className="min-h-screen p-6 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-                <div className="max-w-4xl mx-auto">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-white mb-6 hover:text-blue-400 transition-colors"
-                    >
-                        <AiOutlineArrowLeft className="mr-2" />
-                        Back
-                    </button>
+      <Layout>
+        <div className="min-h-screen p-6 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+          <div className="max-w-4xl mx-auto">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-white mb-6 hover:text-blue-400 transition-colors"
+            >
+              <AiOutlineArrowLeft className="mr-2" />
+              Back
+            </button>
 
-                    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 shadow-xl">
-                        <h1 className="text-3xl font-bold text-white mb-8">
-                            {role === 'ADMIN' ? 'Create New Course' : 'Request New Course'}
-                        </h1>
+            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 shadow-xl">
+              <h1 className="text-3xl font-bold text-white mb-8">
+                {role === "ADMIN" ? "Create New Course" : "Request New Course"}
+              </h1>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <label className="block text-white mb-2" htmlFor="title">
-                                    Course Title
-                                </label>
-                                <input
-                                    type="text"
-                                    id="title"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleInputChange}
-                                    required
-                                    minLength="8"
-                                    maxLength="59"
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                    placeholder="Enter course title"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-white mb-2" htmlFor="description">
-                                    Description
-                                </label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    required
-                                    minLength="8"
-                                    maxLength="500"
-                                    rows="4"
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
-                                    placeholder="Enter course description"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-white mb-2" htmlFor="category">
-                                    Category
-                                </label>
-                                <select
-                                    id="category"
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                >
-                                    <option value="">Select a category</option>
-                                    <option value="Development">Development</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Design">Design</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Music">Music</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-white mb-2" htmlFor="thumbnail">
-                                    Course Thumbnail
-                                </label>
-                                <input
-                                    type="file"
-                                    id="thumbnail"
-                                    accept="image/*"
-                                    onChange={handleThumbnailChange}
-                                    required
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className={`w-full py-3 rounded-lg font-semibold text-white ${
-                                    loading
-                                        ? 'bg-blue-400 cursor-not-allowed'
-                                        : 'bg-blue-600 hover:bg-blue-700'
-                                } transition-colors`}
-                            >
-                                {loading 
-                                    ? (role === 'ADMIN' ? 'Creating Course...' : 'Submitting Request...') 
-                                    : (role === 'ADMIN' ? 'Create Course' : 'Submit Course Request')}
-                            </button>
-                        </form>
-                    </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-white mb-2" htmlFor="title">
+                    Course Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    required
+                    minLength="8"
+                    maxLength="59"
+                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    placeholder="Enter course title"
+                  />
                 </div>
+
+                <div>
+                  <label
+                    className="block text-white mb-2"
+                    htmlFor="description"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    minLength="20"
+                    maxLength="500"
+                    rows="4"
+                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+                    placeholder="Enter course description"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white mb-2" htmlFor="category">
+                    Category
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Development">Development</option>
+                    <option value="Business">Business</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Music">Music</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-white mb-2" htmlFor="thumbnail">
+                    Course Thumbnail
+                  </label>
+                  <input
+                    type="file"
+                    id="thumbnail"
+                    accept="image/*"
+                    onChange={handleThumbnailChange}
+                    required
+                    className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-3 rounded-lg font-semibold text-white ${
+                    loading
+                      ? "bg-blue-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } transition-colors`}
+                >
+                  {loading
+                    ? role === "ADMIN"
+                      ? "Creating Course..."
+                      : "Submitting Request..."
+                    : role === "ADMIN"
+                    ? "Create Course"
+                    : "Submit Course Request"}
+                </button>
+              </form>
             </div>
-        </Layout>
+          </div>
+        </div>
+      </Layout>
     );
 }
 

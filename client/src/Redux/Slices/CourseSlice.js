@@ -84,52 +84,67 @@ export const deleteCourse = createAsyncThunk("/api/v1/courses/delete", async (id
 
 // Create course request for instructors
 // Update the endpoint to match backend route
-export const createCourseRequest = createAsyncThunk("/api/v1/courses/request", async (data) => {
+export const createCourseRequest = createAsyncThunk(
+  "/api/v1/courses/request",
+  async (data) => {
     const loadingMessage = toast.loading("Submitting course request...");
     try {
-        // Change from '/api/v1/course-requests' to '/api/v1/request/course'
-        const res = await axiosInstance.post("/api/v1/request/course", data);
-        toast.success("Course request submitted successfully", { id: loadingMessage });
-        return res?.data;
+      // Change from '/api/v1/course-requests' to '/api/v1/request/course'
+      const res = await axiosInstance.post(
+        "/api/v1/instructor/course-requests",
+        data
+      );
+      toast.success("Course request submitted successfully", {
+        id: loadingMessage,
+      });
+      return res?.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
+      toast.error(error?.response?.data?.message, { id: loadingMessage });
+      throw error;
     }
-});
-
-export const getPendingCourseRequests = createAsyncThunk("/api/v1/courses/pending", async () => {
+  }
+);
+export const getPendingCourseRequests = createAsyncThunk(
+  "/api/v1/courses/pending",
+  async () => {
     try {
-        // Change from '/api/v1/course-requests/pending' to '/api/v1/admin/course-requests'
-        const res = await axiosInstance.get("/api/v1/admin/course-requests");
-        return res?.data;
+      // Change from '/api/v1/course-requests/pending' to '/api/v1/admin/course-requests'
+      const res = await axiosInstance.get("/api/v1/admin/course-requests");
+      return res.data.pendingRequests;
     } catch (error) {
-        toast.error(error?.response?.data?.message);
-        throw error;
+      toast.error(error?.response?.data?.message);
+      throw error;
     }
-});
+  }
+);
 
 export const updateCourseRequestStatus = createAsyncThunk(
-    "/api/v1/courses/update-status",
-    async ({ requestId, status, rejectionReason }) => {
-        const loadingMessage = toast.loading(
-            `${status === 'APPROVED' ? 'Approving' : 'Rejecting'} course request...`
-        );
-        try {
-            // Change from '/api/v1/course-requests/${requestId}/status' to '/api/v1/admin/course-requests/${requestId}'
-            const res = await axiosInstance.patch(`/api/v1/admin/course-requests/${requestId}`, {
-                status,
-                rejectionReason
-            });
-            toast.success(
-                `Course request ${status === 'APPROVED' ? 'approved' : 'rejected'} successfully`,
-                { id: loadingMessage }
-            );
-            return res?.data;
-        } catch (error) {
-            toast.error(error?.response?.data?.message, { id: loadingMessage });
-            throw error;
+  "/api/v1/courses/update-status",
+  async ({ requestId, status, rejectionReason }) => {
+    const loadingMessage = toast.loading(
+      `${status === "APPROVED" ? "Approving" : "Rejecting"} course request...`
+    );
+    try {
+      // Change from '/api/v1/course-requests/${requestId}/status' to '/api/v1/admin/course-requests/${requestId}'
+      const res = await axiosInstance.patch(
+        `/api/v1/admin/course-requests/${requestId}`,
+        {
+          status,
+          rejectionReason,
         }
+      );
+      toast.success(
+        `Course request ${
+          status === "APPROVED" ? "approved" : "rejected"
+        } successfully`,
+        { id: loadingMessage }
+      );
+      return res?.data;
+    } catch (error) {
+      toast.error(error?.response?.data?.message, { id: loadingMessage });
+      throw error;
     }
+  }
 );
 
 const courseSlice = createSlice({
@@ -184,7 +199,7 @@ const courseSlice = createSlice({
       state.error = null;
     });
     builder.addCase(getPendingCourseRequests.fulfilled, (state, action) => {
-      state.pendingRequests = action.payload.requests || [];
+      state.pendingRequests = action.payload || [];
       state.loading = false;
       state.error = null;
     });
