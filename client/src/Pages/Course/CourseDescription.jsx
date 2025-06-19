@@ -15,26 +15,47 @@ export default function CourseDescription() {
   const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
 
   useEffect(() => {
-    if(!state) {
+    if (!state) {
       navigate("/courses");
     }
+    console.log('Role:', role);
+    console.log('User Data:', data);
+    console.log('Subscription Status:', data?.subscription?.status);
+    console.log('Should Show Subscribe:', role === "USER" && (!data?.subscription || data?.subscription?.status !== "active"));
   }, []);
+
+  // Function to check if instructor owns the course
+  const isInstructorCourse = () => {
+    return role === "INSTRUCTOR" && state?.createdBy === data?.fullName;
+  };
+
+  // Function to determine if user should see subscribe button
+  const shouldShowSubscribeButton = () => {
+    const isUser = role === "USER";
+    const hasNoActiveSubscription = !data?.subscription || data?.subscription?.status !== "active";
+    return isUser && hasNoActiveSubscription;
+  };
+
+  // Add this function to check if user can manage lectures
+  const canManageLectures = () => {
+    return role === "ADMIN" || isInstructorCourse();
+  };
 
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           className="container mx-auto md:pt-12 pt-2 px-4 lg:px-20 flex flex-col text-white"
         >
-          <motion.div 
+          <motion.div
             style={{ y: y1, opacity: opacity1 }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-10 py-10 relative"
           >
             {/* Left Column */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -55,7 +76,7 @@ export default function CourseDescription() {
                 />
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -80,13 +101,13 @@ export default function CourseDescription() {
             </motion.div>
 
             {/* Right Column */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="lg:col-span-1 space-y-8"
             >
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
@@ -101,7 +122,7 @@ export default function CourseDescription() {
                 />
               </motion.h1>
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.8 }}
@@ -119,33 +140,135 @@ export default function CourseDescription() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1 }}
+                className="space-y-4"
               >
-                {role === "ADMIN" || data?.subscription?.status === "active" ? (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() =>
-                      navigate("/course/displaylectures", { state: { ...state } })
-                    }
-                    className="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg"
-                  >
-                    Watch Lectures
-                  </motion.button>
-                ) : (
+                {/* Subscribe button for non-active users */}
+                {shouldShowSubscribeButton() && (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => navigate("/checkout")}
-                    className="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg"
+                    className="w-full py-4 px-6 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg flex items-center justify-center gap-2"
                   >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
                     Subscribe to Watch
+                  </motion.button>
+                )}
+
+                {/* Watch Lectures button for active users */}
+                {role === "USER" && data?.subscription?.status === "active" && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate(`/course/${state?._id}/lectures`)}
+                    className="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Watch Lectures
+                  </motion.button>
+                )}
+
+                {/* Add Lecture Button for instructors and admins */}
+                {canManageLectures() && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() =>
+                      navigate(`/course/${state._id}/lecture/add`, {
+                        state: { ...state },
+                      })
+                    }
+                    className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Manage Lectures
                   </motion.button>
                 )}
               </motion.div>
             </motion.div>
           </motion.div>
         </motion.section>
+
+        {/* Move the floating subscription button here, inside the main div */}
+        {shouldShowSubscribeButton() && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="fixed bottom-8 left-0 right-0 mx-auto px-4 z-50"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/checkout")}
+              className="w-full max-w-3xl mx-auto py-4 px-6 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl font-bold text-xl transition-all duration-300 backdrop-blur-sm shadow-lg flex items-center justify-center gap-3"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Subscribe Now to Watch
+              <span className="text-yellow-200 font-normal">₹499/month</span>
+            </motion.button>
+          </motion.div>
+        )}
       </div>
     </Layout>
   );
 }
+

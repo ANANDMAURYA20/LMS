@@ -34,33 +34,53 @@ export default function Login() {
 
     setIsLoading(true);
     const Data = { email: loginData.email, password: loginData.password };
-    const response = await dispatch(login(Data));
-    if (response?.payload?.success) {
-      setLoginData({
-        email: "",
-        password: "",
-      });
-      navigate("/");
+    try {
+      const response = await dispatch(login(Data));
+      if (response?.payload?.success) {
+        setLoginData({
+          email: "",
+          password: "",
+        });
+        
+        // Get user role from response
+        const userRole = response?.payload?.user?.role;
+        
+        // Role-based redirect
+        switch(userRole) {
+          case 'INSTRUCTOR':
+            navigate("/instructor/courses");
+            break;
+          case 'ADMIN':
+            navigate("/admin/dashboard");
+            break;
+          default:
+            navigate("/");
+            break;
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <Layout hideFooter={true} hideNav={true}>
+      <div className="min-h-screen flex items-center justify-center bg-black p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
+          <div className="backdrop-blur-lg bg-black/80 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(255,128,0,0.2)] border border-orange-500/20">
             <div className="flex flex-col items-center mb-8">
               <motion.div
                 whileHover={{ scale: 1.1 }}
-                className="w-20 h-20 rounded-full flex items-center justify-center bg-blue-500/20 dark:bg-blue-400/20 backdrop-blur-sm mb-6 border border-white/30"
+                className="w-20 h-20 rounded-full flex items-center justify-center bg-orange-500/20 backdrop-blur-sm mb-6 border border-orange-500/30"
               >
-                <BsCameraFill className="w-10 h-10 text-white" />
+                <BsCameraFill className="w-10 h-10 text-orange-500" />
               </motion.div>
             </div>
 
@@ -73,7 +93,7 @@ export default function Login() {
                     value={loginData.email}
                     onChange={handleUserInput}
                     placeholder="Username"
-                    className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                   />
                 </div>
 
@@ -84,22 +104,22 @@ export default function Login() {
                     value={loginData.password}
                     onChange={handleUserInput}
                     placeholder="Password"
-                    className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center text-gray-200">
+                <label className="flex items-center text-gray-300">
                   <input
                     type="checkbox"
-                    className="mr-2 w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500 bg-transparent"
+                    className="mr-2 w-4 h-4 rounded border-orange-500/20 text-orange-500 focus:ring-orange-500 bg-transparent"
                   />
                   Remember me
                 </label>
                 <Link
                   to="/user/profile/reset-password"
-                  className="text-gray-200 hover:text-blue-400 transition-colors duration-300"
+                  className="text-gray-300 hover:text-orange-500 transition-colors duration-300"
                 >
                   Forgot Password?
                 </Link>
@@ -110,24 +130,24 @@ export default function Login() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 font-medium backdrop-blur-sm"
+                className="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-300 font-medium backdrop-blur-sm"
               >
                 {isLoading ? "Logging in..." : "LOGIN"}
               </motion.button>
 
               <div className="text-center space-y-3">
                 <div className="relative flex items-center justify-center">
-                  <div className="h-px w-full bg-gray-500/30"></div>
-                  <span className="absolute bg-transparent px-3 text-gray-300 text-sm">
+                  <div className="h-px w-full bg-orange-500/20"></div>
+                  <span className="absolute bg-black px-3 text-gray-400 text-sm">
                     or
                   </span>
                 </div>
 
-                <p className="text-gray-300">
+                <p className="text-gray-400">
                   Don't have an account?{" "}
                   <Link 
                     to="/signup" 
-                    className="text-blue-400 hover:text-blue-300 transition-colors duration-300 font-medium"
+                    className="text-orange-500 hover:text-orange-400 transition-colors duration-300 font-medium"
                   >
                     Sign up
                   </Link>

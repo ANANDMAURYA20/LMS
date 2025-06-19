@@ -1,11 +1,35 @@
 import { Router } from "express";
-const router = Router();
 import { isLoggedIn, authorisedRoles } from "../middleware/auth.middleware.js";
+import { 
+    getInstructorCourses, 
+    getInstructorStats, 
+    createCourseRequest,
+    getInstructorCourseRequests
+} from '../controllers/instructor.controller.js';
+import upload from '../middleware/multer.middleware.js';
 
-// Import controller methods (to be created)
-import { getInstructorCourses } from '../controllers/instructor.controller.js';
+const router = Router();
+
+// Course request routes
+router.route('/course-requests')
+    .post(
+        isLoggedIn, 
+        authorisedRoles('INSTRUCTOR'), 
+        upload.single('thumbnail'),
+        createCourseRequest
+    )
+    .get(
+        isLoggedIn, 
+        authorisedRoles('INSTRUCTOR'), 
+        getInstructorCourseRequests
+    );
 
 // Get all courses created by the instructor
-router.get('/courses', isLoggedIn, authorisedRoles('INSTRUCTOR'), getInstructorCourses);
+router.route('/courses')
+    .get(isLoggedIn, authorisedRoles('INSTRUCTOR', 'ADMIN'), getInstructorCourses);
+
+// Get instructor's statistics
+router.route('/stats')
+    .get(isLoggedIn, authorisedRoles('INSTRUCTOR', 'ADMIN'), getInstructorStats);
 
 export default router;

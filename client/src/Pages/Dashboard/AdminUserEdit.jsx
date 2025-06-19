@@ -39,7 +39,7 @@ function AdminUserEdit() {
             email: userData.email || '',
             number: userData.number || '',
             isEmailVerified: userData.isEmailVerified || false,
-            role: userData.role || 'USER',
+            role: userData.role || 'STUDENT',
             subscription: {
               status: userData.subscription?.status || 'inactive'
             }

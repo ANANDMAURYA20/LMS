@@ -19,7 +19,7 @@ export default function Signup() {
     password: "",
     number: "",
     avatar: "",
-    role: "USER", // Default role
+    role: "STUDENT", // Default role is now STUDENT
   });
 
   function handleUserInput(e) {
@@ -82,7 +82,7 @@ export default function Signup() {
         password: "",
         number: "",
         avatar: "",
-        role: "USER",
+        role: "STUDENT",
       });
       setPreviewImage("");
       navigate("/login");
@@ -90,24 +90,24 @@ export default function Signup() {
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <Layout hideFooter={true} hideNav={true}>
+      <div className="min-h-screen flex items-center justify-center bg-black p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
+          <div className="backdrop-blur-lg bg-black/80 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(255,128,0,0.2)] border border-orange-500/20">
             <div className="flex flex-col items-center mb-8">
               <motion.div
                 whileHover={{ scale: 1.1 }}
-                className="w-20 h-20 rounded-full flex items-center justify-center bg-blue-500/20 dark:bg-blue-400/20 backdrop-blur-sm mb-6 border border-white/30"
+                className="w-20 h-20 rounded-full flex items-center justify-center bg-orange-500/20 backdrop-blur-sm mb-6 border border-orange-500/30"
               >
                 {previewImage ? (
                   <img src={previewImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
                 ) : (
-                  <BsCameraFill className="w-10 h-10 text-white" />
+                  <BsCameraFill className="w-10 h-10 text-orange-500" />
                 )}
               </motion.div>
             </div>
@@ -120,7 +120,7 @@ export default function Signup() {
                   value={signupData.fullName}
                   onChange={handleUserInput}
                   placeholder="Full Name"
-                  className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function Signup() {
                   value={signupData.number}
                   onChange={handleUserInput}
                   placeholder="Phone Number"
-                  className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                 />
               </div>
 
@@ -142,7 +142,7 @@ export default function Signup() {
                   value={signupData.email}
                   onChange={handleUserInput}
                   placeholder="Email Address"
-                  className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                 />
               </div>
 
@@ -153,32 +153,31 @@ export default function Signup() {
                   value={signupData.password}
                   onChange={handleUserInput}
                   placeholder="Password"
-                  className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                 />
               </div>
-              
-              {/* Role Selection */}
+
               <div className="relative">
                 <label className="block text-white text-sm mb-2">Register as</label>
                 <select
                   name="role"
                   value={signupData.role}
                   onChange={handleUserInput}
-                  className="w-full px-4 py-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm text-white placeholder-gray-300 border border-white/10 focus:border-blue-400/50 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 bg-black/50 rounded-lg backdrop-blur-sm text-white placeholder-gray-400 border border-orange-500/20 focus:border-orange-500/50 focus:outline-none transition-all duration-300"
                 >
-                  <option value="USER">Student</option>
+                  <option value="STUDENT">Student</option>
                   <option value="INSTRUCTOR">Instructor</option>
                 </select>
               </div>
 
               <div className="relative">
                 <label className="block text-white text-sm mb-2">Profile Picture (Optional)</label>
-                <div className="flex items-center gap-4 p-3 bg-blue-900/30 dark:bg-gray-700/30 rounded-lg backdrop-blur-sm border border-white/10">
+                <div className="flex items-center gap-4 p-3 bg-black/50 rounded-lg backdrop-blur-sm border border-orange-500/20">
                   <input
                     type="file"
                     onChange={getImage}
                     accept=".jpg, .jpeg, .png, image/*"
-                    className="text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500/50 file:text-white hover:file:bg-blue-500/70"
+                    className="text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
                   />
                 </div>
               </div>
@@ -188,14 +187,14 @@ export default function Signup() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 font-medium backdrop-blur-sm mt-6"
+                className="w-full py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-300 font-medium backdrop-blur-sm mt-6"
               >
                 {isLoading ? "Creating Account..." : "Sign Up"}
               </motion.button>
 
-              <p className="text-center text-gray-300 mt-4">
+              <p className="text-center text-gray-400 mt-4">
                 Already have an account?{" "}
-                <Link to="/login" className="text-blue-400 hover:text-blue-300 transition-colors duration-300">
+                <Link to="/login" className="text-orange-500 hover:text-orange-400 transition-colors duration-300">
                   Login
                 </Link>
               </p>
@@ -204,5 +203,5 @@ export default function Signup() {
         </motion.div>
       </div>
     </Layout>
-  );
+);
 }

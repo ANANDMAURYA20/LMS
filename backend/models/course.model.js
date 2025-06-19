@@ -27,6 +27,15 @@ const courseSchema = new Schema({
             type: String
         }
     },
+    approvalStatus: {
+        type: String,
+        enum: ['PENDING', 'APPROVED', 'REJECTED'],
+        default: 'PENDING'
+    },
+    rejectionReason: {
+        type: String,
+        default: null
+    },
     lectures: [
         {
             title: String,
@@ -60,9 +69,17 @@ const courseSchema = new Schema({
                         type: Number,
                     },
                 }
-            ]
+            ],
+            approvalStatus: {
+                type: String,
+                enum: ['PENDING', 'APPROVED', 'REJECTED'],
+                default: 'PENDING'
+            },
+            rejectionReason: {
+                type: String,
+                default: null
+            }
         }
-        
     ],
     numberOfLectures: {
         type: Number,
@@ -75,12 +92,55 @@ const courseSchema = new Schema({
     instructor: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
+    },
+    // Add student tracking
+    enrolledStudents: [{
+        student: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        enrolledAt: {
+            type: Date,
+            default: Date.now
+        },
+        lastAccessed: {
+            type: Date,
+            default: Date.now
+        },
+        completedLectures: [{
+            lecture: {
+                type: Number,  // Index of the lecture in the lectures array
+                required: true
+            },
+            completedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }]
+    }],
+    totalEnrollments: {
+        type: Number,
+        default: 0
+    },
+    activeStudents: {
+        type: Number,
+        default: 0,
+        get: function() {
+            // Count students who accessed the course in the last 30 days
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            return this.enrolledStudents.filter(student => 
+                student.lastAccessed >= thirtyDaysAgo
+            ).length;
+        }
     }
 },
-    {
-        timestamps: true
-    })
+{
+    timestamps: true,
+    toJSON: { getters: true }
+});
 
 const Course = model("Course", courseSchema);
 

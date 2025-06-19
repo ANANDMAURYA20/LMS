@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCourseLectures,
@@ -9,19 +9,30 @@ import {
 import Layout from "../../Layout/Layout";
 import toast from "react-hot-toast";
 import { axiosInstance } from '../../Helpers/axiosInstance';
-import ChatBot from "../../components/ChatBot"; // Import the ChatBot component
+import ChatBot from "../../Components/ChatBot";
+import { FaTrash, FaPlus, FaVideo, FaDownload } from 'react-icons/fa';
 
 export default function DisplayLecture() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { state } = useLocation();
+  const { courseId } = useParams();
   const { lectures } = useSelector((state) => state.lecture);
-  const { role } = useSelector((state) => state.auth);
+  const { role, data } = useSelector((state) => state.auth);
 
   const [currentVideo, setCurrentVideo] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  const [deletingLecture, setDeletingLecture] = useState(null);
+
+  useEffect(() => {
+    if (!courseId) {
+      navigate("/courses");
+      return;
+    }
+    dispatch(getCourseLectures(courseId));
+  }, [courseId, dispatch]);
 
   // Reset quiz state when changing lectures
   const handleLectureChange = (idx) => {
@@ -32,68 +43,75 @@ export default function DisplayLecture() {
   };
 
   async function onLectureDelete(courseId, lectureId) {
-    await dispatch(
-      deleteCourseLecture({ courseId: courseId, lectureId: lectureId })
-    );
-    await dispatch(getCourseLectures(courseId));
+    try {
+      const loadingToast = toast.loading("Deleting lecture...");
+      
+      // Delete the lecture using axios directly
+      await axiosInstance.delete(`/api/v1/courses/${courseId}/lectures/${lectureId}`);
+      
+      // Refresh the lectures list
+      await dispatch(getCourseLectures(courseId));
+      
+      toast.success("Lecture deleted successfully", { 
+        id: loadingToast,
+        duration: 3000
+      });
+      
+      setDeletingLecture(null);
+    } catch (error) {
+      console.error("Delete lecture error:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete lecture", {
+        duration: 3000
+      });
+    }
   }
 
-  useEffect(() => {
-    if (!state) navigate("/courses");
-    dispatch(getCourseLectures(state._id));
-  }, []);
-  
+  // Function to handle delete confirmation
+  const handleDeleteClick = (courseId, lectureId, lectureTitle) => {
+    setDeletingLecture({ courseId, lectureId, title: lectureTitle });
+  };
+
   const handlePdfDownload = (secure_url) => {
     window.open(secure_url, '_blank');
   };
 
-  const handleOptionSelect = (questionIndex, optionIndex) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionIndex]: optionIndex
-    });
+  const handleAnswerSelect = (questionIndex, optionIndex) => {
+    if (!showResults) {
+      setSelectedAnswers({
+        ...selectedAnswers,
+        [questionIndex]: optionIndex
+      });
+    }
   };
 
-  const handleSubmitQuiz = async () => {
-    const currentQuestions = lectures[currentVideo]?.questions || [];
-    
-    // Check if all questions are answered
-    const unansweredQuestions = currentQuestions.filter((_, index) => 
-      selectedAnswers[index] === undefined
-    );
+  const handleSubmitQuiz = () => {
+    const currentLecture = lectures[currentVideo];
+    if (!currentLecture?.questions || currentLecture.questions.length === 0) return;
 
-    if (unansweredQuestions.length > 0) {
-      toast.error(`Please answer all questions before submitting.`);
-      return;
-    }
-    
     let correctAnswers = 0;
-    currentQuestions.forEach((question, index) => {
+    currentLecture.questions.forEach((question, index) => {
       if (selectedAnswers[index] === question.correctOption) {
         correctAnswers++;
       }
     });
-    
-    const percentage = (correctAnswers / currentQuestions.length) * 100;
-    setScore(percentage);
+
+    const calculatedScore = (correctAnswers / currentLecture.questions.length) * 100;
+    setScore(calculatedScore);
     setShowResults(true);
 
     // Save score to backend
-    try {
-      const response = await axiosInstance.post('/api/v1/scores', {
-        courseId: state._id,
-        lectureId: lectures[currentVideo]._id,
-        score: percentage,
-        questionsAttempted: currentQuestions.length,
-        correctAnswers
-      });
+    saveScore(calculatedScore);
+  };
 
-      if (response.data.success) {
-        toast.success('Quiz submitted and score saved successfully!');
-      }
+  const saveScore = async (score) => {
+    try {
+      await axiosInstance.post('/api/v1/scores', {
+        courseId: courseId,
+        lectureId: lectures[currentVideo]._id,
+        score: score
+      });
     } catch (error) {
-      toast.error('Failed to save score');
-      console.error('Score saving error:', error);
+      console.error('Error saving score:', error);
     }
   };
 
@@ -135,7 +153,12 @@ export default function DisplayLecture() {
     setShowResults(false);
     setScore(0);
   };
-  
+
+  // Function to check if user can manage lectures
+  const canManageLectures = () => {
+    return role === "ADMIN" || (role === "INSTRUCTOR" && state?.instructor === data?._id);
+  };
+
   return (
     <Layout hideFooter={true} hideNav={true} hideBar={true}>
       <section className="flex flex-col gap-6 items-center py-8 px-4">
@@ -187,58 +210,99 @@ export default function DisplayLecture() {
             </div>
 
             {/* Right section for lectures list */}
-            <div className="md:w-[48%] w-full max-h-[500px] overflow-y-auto">
-              <ul className="w-full md:p-2 p-0 flex flex-col gap-5 shadow-sm">
-                <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex items-center justify-between">
-                  <p>Lectures list</p>
-                  {role === "ADMIN" && (
+            <div className="md:w-[48%] w-full">
+              <div className="bg-slate-50 dark:bg-slate-100 p-4 rounded-lg shadow-lg mb-4 sticky top-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold text-[#2320f7]">Lectures List</h3>
+                  {canManageLectures() && (
                     <button
-                      onClick={() =>
-                        navigate("/course/addlecture", { state: { ...state } })
-                      }
-                      className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm"
+                      onClick={() => {
+                        if (role === 'ADMIN') {
+                          navigate(`/course/${courseId}/lecture/add`, { 
+                            state: { 
+                              _id: courseId,
+                              title: state?.title,
+                              instructor: state?.instructor 
+                            } 
+                          });
+                        } else {
+                          navigate(`/course/${courseId}/lecture/request`, { 
+                            state: { 
+                              _id: courseId,
+                              title: state?.title,
+                              instructor: state?.instructor 
+                            } 
+                          });
+                        }
+                      }}
+                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-md"
                     >
-                      Add new lecture
+                      <FaPlus className="text-sm" />
+                      <span>{role === 'ADMIN' ? 'Add Lecture' : 'Request Lecture'}</span>
                     </button>
                   )}
-                </li>
-                {lectures &&
-                  lectures.map((lecture, idx) => (
-                    <li className="space-y-2" key={lecture._id}>
-                      <div className="flex flex-col gap-2">
-                        <p
-                          className={`cursor-pointer text-base font-[500] font-open-sans ${
-                            currentVideo === idx
-                              ? "text-blue-600 dark:text-yellow-500"
-                              : "text-gray-600 dark:text-white"
-                          }`}
-                          onClick={() => handleLectureChange(idx)}
-                        >
-                          <span className="font-inter">{idx + 1}. </span>
-                          {lecture?.title}
-                        </p>
-                        
-                        {lecture?.materials?.secure_url && (
-                          <button
-                            onClick={() => handlePdfDownload(lecture.materials.secure_url)}
-                            className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md text-white font-inter font-[500] text-sm w-fit flex items-center gap-2"
-                          >
-                            Download PDF
-                          </button>
-                        )}
-                        
-                        {role === "ADMIN" && (
-                          <button
-                            onClick={() => onLectureDelete(state?._id, lecture?._id)}
-                            className="bg-[#ff3838] px-2 py-1 rounded-md text-white font-inter font-[500] text-sm w-fit"
-                          >
-                            Delete lecture
-                          </button>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-              </ul>
+                </div>
+              </div>
+
+              <div className="max-h-[500px] overflow-y-auto">
+                <ul className="w-full flex flex-col gap-4">
+                  {lectures &&
+                    lectures.map((lecture, idx) => (
+                      <li 
+                        key={lecture._id}
+                        className={`p-4 rounded-lg transition-all duration-300 ${
+                          currentVideo === idx
+                            ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800"
+                            : "bg-white/50 dark:bg-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
+                        }`}
+                      >
+                        <div className="flex flex-col gap-3">
+                          {/* Lecture Title and Number */}
+                          <div className="flex items-center gap-3">
+                            <FaVideo className={`text-lg ${
+                              currentVideo === idx
+                                ? "text-blue-500 dark:text-blue-400"
+                                : "text-gray-400"
+                            }`} />
+                            <p
+                              className={`cursor-pointer text-base font-medium ${
+                                currentVideo === idx
+                                  ? "text-blue-600 dark:text-blue-400"
+                                  : "text-gray-700 dark:text-gray-300"
+                              }`}
+                              onClick={() => handleLectureChange(idx)}
+                            >
+                              <span className="font-semibold">Lecture {idx + 1}:</span> {lecture?.title}
+                            </p>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2 ml-7">
+                            {lecture?.materials?.secure_url && (
+                              <button
+                                onClick={() => handlePdfDownload(lecture.materials.secure_url)}
+                                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300"
+                              >
+                                <FaDownload className="text-xs" />
+                                <span>PDF</span>
+                              </button>
+                            )}
+                            
+                            {canManageLectures() && (
+                              <button
+                                onClick={() => handleDeleteClick(courseId, lecture?._id, lecture?.title)}
+                                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300"
+                              >
+                                <FaTrash className="text-xs" />
+                                <span>Delete</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -279,13 +343,13 @@ export default function DisplayLecture() {
                                 ? 'bg-blue-50 dark:bg-blue-900'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                             }`}
-                          onClick={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                          onClick={() => !showResults && handleAnswerSelect(qIndex, oIndex)}
                         >
                           <input
                             type="radio"
                             name={`question-${qIndex}`}
                             checked={selectedAnswers[qIndex] === oIndex}
-                            onChange={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                            onChange={() => !showResults && handleAnswerSelect(qIndex, oIndex)}
                             className="w-4 h-4"
                             disabled={showResults}
                           />
@@ -342,6 +406,34 @@ export default function DisplayLecture() {
         {/* Add the ChatBot component */}
         <ChatBot lectureTitle={lectures && lectures[currentVideo]?.title} />
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {deletingLecture && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Delete Lecture
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete the lecture "{deletingLecture.title}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setDeletingLecture(null)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onLectureDelete(deletingLecture.courseId, deletingLecture.lectureId)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

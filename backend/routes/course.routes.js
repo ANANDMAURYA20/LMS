@@ -6,17 +6,54 @@ import upload from "../middleware/multer.middleware.js";
 
 router.route('/')
     .get(getAllCourses)
-    .post(isLoggedIn, authorisedRoles('ADMIN', 'INSTRUCTOR'), upload.single("thumbnail"), createCourse)
-    .delete(isLoggedIn, authorisedRoles('ADMIN'), deleteCourseLecture)
-    .put(isLoggedIn, authorisedRoles('ADMIN'), upload.single("lecture"), updateCourseLecture)
+    .post(
+        isLoggedIn, 
+        authorisedRoles('ADMIN', 'INSTRUCTOR'), 
+        upload.single("thumbnail"), 
+        createCourse
+    );
 
 router.route('/:id')
     .get(isLoggedIn, authorizeSubscriber, getLecturesByCourseId)
-    .put(isLoggedIn, authorisedRoles("ADMIN", "INSTRUCTOR"), isInstructorCourse, upload.single("thumbnail"), updateCourse)
-    .delete(isLoggedIn, authorisedRoles('ADMIN', 'INSTRUCTOR'), isInstructorCourse, removeCourse)
-    router.post('/:id', isLoggedIn, authorisedRoles('ADMIN', 'INSTRUCTOR'), isInstructorCourse, upload.fields([
-        { name: 'lecture', maxCount: 1 },
-        { name: 'pdf', maxCount: 1 }
-    ]), addLectureToCourseById);
+    .put(
+        isLoggedIn, 
+        authorisedRoles('ADMIN', 'INSTRUCTOR'),
+        isInstructorCourse,
+        upload.single("thumbnail"),
+        updateCourse
+    )
+    .delete(
+        isLoggedIn, 
+        authorisedRoles('ADMIN', 'INSTRUCTOR'),
+        isInstructorCourse,
+        removeCourse
+    );
 
-export default router
+router.route('/:id/lectures')
+    .post(
+        isLoggedIn,
+        authorisedRoles('ADMIN', 'INSTRUCTOR'),
+        isInstructorCourse,
+        upload.fields([
+            { name: 'lecture', maxCount: 1 },
+            { name: 'materials', maxCount: 1 }
+        ]),
+        addLectureToCourseById
+    );
+
+router.route('/:courseId/lectures/:lectureId')
+    .delete(
+        isLoggedIn,
+        authorisedRoles('ADMIN', 'INSTRUCTOR'),
+        isInstructorCourse,
+        deleteCourseLecture
+    )
+    .put(
+        isLoggedIn,
+        authorisedRoles('ADMIN', 'INSTRUCTOR'),
+        isInstructorCourse,
+        upload.single("lecture"),
+        updateCourseLecture
+    );
+
+export default router;

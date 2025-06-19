@@ -9,9 +9,15 @@ import TextArea from "../../Components/InputBox/TextArea";
 import { motion } from "framer-motion";
 import { BsCloudUpload } from "react-icons/bs";
 
+// Add this near the top of the file
+import { useSelector } from "react-redux";
+
 export default function CreateCourse() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Add this line to get the user role
+  const { role } = useSelector((state) => state.auth);
   
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [userInput, setUserInput] = useState({
@@ -22,6 +28,12 @@ export default function CreateCourse() {
     thumbnail: null,
     previewImage: "",
   });
+
+  // Add this useEffect to check role on component mount
+  React.useEffect(() => {
+    console.log('Current user role:', role);
+    console.log('Is logged in:', localStorage.getItem('isLoggedIn'));
+  }, [role]);
 
   function handleImageUpload(e) {
     e.preventDefault();
@@ -47,41 +59,52 @@ export default function CreateCourse() {
     });
   }
 
-  async function onFormSubmit(e) {
+  // Change the function declaration to async
+  async function handleSubmit(e) {
     e.preventDefault();
-
-    if (
-      !userInput.title ||
-      !userInput.description ||
-      !userInput.category ||
-      !userInput.createdBy ||
-      !userInput.thumbnail
-    ) {
-      toast.error("All fields are required!");
+    
+    if (!role) {
+      toast.error("Please login first");
+      navigate("/login");
       return;
     }
-
-    setIsCreatingCourse(true);
-    const formData = new FormData();
-    formData.append("title", userInput.title);
-    formData.append("description", userInput.description);
-    formData.append("category", userInput.category);
-    formData.append("createdBy", userInput.createdBy);
-    formData.append("thumbnail", userInput.thumbnail);
-
-    const response = await dispatch(createNewCourse(formData));
-    if (response?.payload?.success) {
-      setUserInput({
-        title: "",
-        category: "",
-        createdBy: "",
-        description: "",
-        thumbnail: null,
-        previewImage: "",
-      });
-      navigate("/courses");
+  
+    try {
+      setIsCreatingCourse(true);
+      const formData = new FormData();
+      formData.append("title", userInput.title);
+      formData.append("category", userInput.category);
+      formData.append("createdBy", userInput.createdBy);
+      formData.append("description", userInput.description);
+      if (userInput.thumbnail) {
+        formData.append("thumbnail", userInput.thumbnail);
+      }
+  
+      // Use createNewCourse instead of createCourseRequest
+      const response = await dispatch(createNewCourse(formData));
+      if (response?.payload?.success) {
+        toast.success("Course created successfully");
+        setUserInput({
+          title: "",
+          category: "",
+          createdBy: "",
+          description: "",
+          thumbnail: null,
+          previewImage: "",
+        });
+        navigate("/courses");
+      }
+    } catch (error) {
+      console.error('Course creation error:', error);
+      if (error?.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+      } else {
+        toast.error(error?.response?.data?.message || "Failed to create course");
+      }
+    } finally {
+      setIsCreatingCourse(false);
     }
-    setIsCreatingCourse(false);
   }
 
   return (

@@ -6,18 +6,22 @@ import Sidebar from "../Components/Sidebar";
 export default function Layout({ children, hideBar, hideNav, hideFooter }) {
   return (
     <>
-      <main className="min-h-[100vh] bg-white dark:bg-base-200">
-        {/* navbar */}
+      <main className="min-h-screen bg-black text-white transition-colors duration-300">
+        {/* Navbar */}
         {!hideNav && <Navbar />}
+
+        {/* WhatsApp Link */}
         <a href="https://wa.me/ " target="_blank" rel="noopener noreferrer"></a>
 
-        {/* sidebar */}
-        <Sidebar hideBar={hideBar} />
+        {/* Sidebar */}
+        {!hideBar && <Sidebar />}
 
-        {/* main content */}
-        {children}
+        {/* Main Content */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {children}
+        </div>
 
-        {/* footer */}
+        {/* Footer */}
         {!hideFooter && <Footer />}
       </main>
     </>
