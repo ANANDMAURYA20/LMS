@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
+const VALID_ROLES = ['STUDENT', 'INSTRUCTOR', 'ADMIN'];
+
 const userSchema = new Schema({
     fullName: {
         type: String,
@@ -48,8 +50,17 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
+        required: [true, 'Role is required'],
+        uppercase: true,
+        trim: true,
+        enum: {
+            values: VALID_ROLES,
+            message: props => `${props.value} is not a valid role. Must be one of: ${VALID_ROLES.join(', ')}`
+        },
         default: 'STUDENT',
-        enum: ['STUDENT', 'ADMIN', 'INSTRUCTOR']
+        set: function(v) {
+            return (v || 'STUDENT').toString().trim().toUpperCase();
+        }
     },
     forgotPasswordToken: String,
     forgotPasswordExpiry: Date,
@@ -58,11 +69,19 @@ const userSchema = new Schema({
         status: String
     }
 },
-    {
-        timestamps: true
-    });
+{
+    timestamps: true
+});
 
+// Pre-validate middleware to ensure role is uppercase
+userSchema.pre('validate', function(next) {
+    if (this.role) {
+        this.role = this.role.toString().trim().toUpperCase();
+    }
+    next();
+});
 
+// Hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
@@ -93,7 +112,7 @@ userSchema.methods = {
         return resetToken;
     },
 
-    generateEmailVerificationToken : async function () {
+    generateEmailVerificationToken: async function () {
         const verificationToken = crypto.randomBytes(20).toString('hex');
     
         this.emailVerificationToken = crypto
@@ -104,9 +123,7 @@ userSchema.methods = {
         this.emailVerificationExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
     
         return verificationToken;
-
-}
-}
-
+    }
+};
 
 export default model("User", userSchema);

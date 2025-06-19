@@ -14,6 +14,7 @@ import {
   FaBlog,
   FaGraduationCap,
   FaBrain,
+  FaChalkboardTeacher,
 } from "react-icons/fa";
 
 export default function Sidebar({ hideBar = false }) {
@@ -129,31 +130,41 @@ export default function Sidebar({ hideBar = false }) {
               </li>
             )}
 
-
-            {/* Modified to include INSTRUCTOR role */}
-            {(role === "ADMIN" || role === "INSTRUCTOR") && (
+            {/* Instructor Dashboard */}
+            {(role === "INSTRUCTOR") && (
               <li>
-                <Link to="/course/create" className="flex gap-4 items-center">
-                  <FaPlus
+                <Link to="/instructor/courses" className="flex gap-4 items-center">
+                  <FaChalkboardTeacher
                     size={18}
                     className="text-gray-500 dark:text-slate-100"
                   />
-                  Create new course
+                  Instructor Dashboard
                 </Link>
               </li>
             )}
 
-            {/* Add instructor courses section */}
-            {role === "INSTRUCTOR" && (
-              <li>
-                <Link to="/instructor/courses" className="flex gap-4 items-center">
-                  <FaList
-                    size={18}
-                    className="text-gray-500 dark:text-slate-100"
-                  />
-                  My Courses
-                </Link>
-              </li>
+            {/* Create Course - for both ADMIN and INSTRUCTOR */}
+            {(role === "ADMIN" || role === "INSTRUCTOR") && (
+              <>
+                <li>
+                  <Link to="/course/request" className="flex gap-4 items-center">
+                    <FaPlus
+                      size={18}
+                      className="text-gray-500 dark:text-slate-100"
+                    />
+                    Create New Course
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/instructor/courses" className="flex gap-4 items-center">
+                    <FaList
+                      size={18}
+                      className="text-gray-500 dark:text-slate-100"
+                    />
+                    My Courses
+                  </Link>
+                </li>
+              </>
             )}
 
             {role === "ADMIN" && (

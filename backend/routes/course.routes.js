@@ -34,7 +34,10 @@ router.route('/:id/lectures')
         isLoggedIn,
         authorisedRoles('ADMIN', 'INSTRUCTOR'),
         isInstructorCourse,
-        upload.single("lecture"),
+        upload.fields([
+            { name: 'lecture', maxCount: 1 },
+            { name: 'materials', maxCount: 1 }
+        ]),
         addLectureToCourseById
     );
 

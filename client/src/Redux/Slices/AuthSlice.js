@@ -5,18 +5,41 @@ import { axiosInstance } from '../../Helpers/axiosInstance';
 const initialState = {
     isLoggedIn: localStorage.getItem("isLoggedIn") || false,
     role: localStorage.getItem("role") || "",
-    data: JSON.parse(localStorage.getItem("data")) || {}
+    data: JSON.parse(localStorage.getItem("data")) || {},
+    token: localStorage.getItem("token") || null
 }
 
 // .....signup.........
 export const createAccount = createAsyncThunk("/api/v1/user/register", async (data) => {
     const loadingMessage = toast.loading("Please wait! creating your account...");
     try {
+        // Log the form data for debugging
+        const formDataEntries = {};
+        for (let [key, value] of data.entries()) {
+            formDataEntries[key] = value;
+            console.log(`Form data entry - ${key}:`, value);
+        }
+        console.log('Full registration data:', formDataEntries);
+        
         const res = await axiosInstance.post("/api/v1/user/register", data);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
+        
+        if (res?.data?.success) {
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } else {
+            const errorMessage = res?.data?.message || 'Registration failed';
+            console.error('Registration failed:', errorMessage);
+            toast.error(errorMessage, { id: loadingMessage });
+            throw new Error(errorMessage);
+        }
     } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
+        console.error('Registration error:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        const errorMessage = error?.response?.data?.message || error.message || "Registration failed";
+        toast.error(errorMessage, { id: loadingMessage });
         throw error;
     }
 })
@@ -56,13 +79,31 @@ export const login = createAsyncThunk("/api/v1/user/login", async (data) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
     try {
         const res = await axiosInstance.post("/api/v1/user/login", data);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
+        
+        // Log the response for debugging
+        console.log('Login response:', res.data);
+        
+        // Validate the role
+        const userRole = res?.data?.user?.role;
+        if (!userRole || !['STUDENT', 'INSTRUCTOR', 'ADMIN'].includes(userRole)) {
+            throw new Error('Invalid user role received');
+        }
+        
+        // Show success message with role-specific text
+        const roleMessages = {
+            'INSTRUCTOR': 'Welcome back, Instructor! Redirecting to your dashboard...',
+            'ADMIN': 'Welcome back, Admin! Redirecting to admin panel...',
+            'STUDENT': 'Welcome back! Redirecting to homepage...'
+        };
+        
+        toast.success(roleMessages[userRole] || res?.data?.message, { id: loadingMessage });
+        return res?.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
+        const errorMsg = error?.response?.data?.message || error.message || "Login failed";
+        toast.error(errorMsg, { id: loadingMessage });
         throw error;
     }
-})
+});
 
 // .....Logout.........
 export const logout = createAsyncThunk("/api/v1/user/logout", async () => {
@@ -81,7 +122,7 @@ export const logout = createAsyncThunk("/api/v1/user/logout", async () => {
 export const getUserData = createAsyncThunk("/auth/user/me", async () => {
     const loadingMessage = toast.loading("fetching profile...");
     try {
-        const res = await axiosInstance.get("/user/me");
+        const res = await axiosInstance.get("/api/v1/user/me");
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -226,22 +267,37 @@ const authSlice = createSlice({
 
         // for login
         builder.addCase(login.fulfilled, (state, action) => {
-            localStorage.setItem("data", JSON.stringify(action?.payload?.user));
-            localStorage.setItem("role", action?.payload?.user?.role);
-            localStorage.setItem("isLoggedIn", true);
-            state.data = action?.payload?.user;
-            state.role = action?.payload?.user?.role;
             state.isLoggedIn = true;
+            state.data = action.payload.user;
+            state.role = action.payload.user.role;
+            state.token = action.payload.token;
+            localStorage.setItem("isLoggedIn", true);
+            localStorage.setItem("data", JSON.stringify(action.payload.user));
+            localStorage.setItem("role", action.payload.user.role);
+            localStorage.setItem("token", action.payload.token);
+        })
+        .addCase(login.rejected, (state) => {
+            state.isLoggedIn = false;
+            state.data = {};
+            state.role = "";
+            state.token = null;
+            localStorage.clear();
         })
 
         // for logout
-        builder.addCase(logout.fulfilled, (state, action) => {
-            localStorage.removeItem("data");
-            localStorage.removeItem("role");
-            localStorage.removeItem("isLoggedIn");
+        builder.addCase(logout.fulfilled, (state) => {
+            state.isLoggedIn = false;
             state.data = {};
             state.role = "";
+            state.token = null;
+            localStorage.clear();
+        })
+        .addCase(logout.rejected, (state) => {
             state.isLoggedIn = false;
+            state.data = {};
+            state.role = "";
+            state.token = null;
+            localStorage.clear();
         })
 
         // for get user data

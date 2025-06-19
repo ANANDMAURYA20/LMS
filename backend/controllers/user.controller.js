@@ -18,6 +18,7 @@ const cookieOptions = {
 // Register  
 const register = async (req, res, next) => {
     try {
+        console.log('Registration request body:', req.body);
         const { fullName, email, password, number, role } = req.body;
 
         // Check if user misses any fields
@@ -31,16 +32,19 @@ const register = async (req, res, next) => {
             return next(new AppError("Email already exists, please login", 400));
         }
 
-        // Validate role if provided
-        const validRole = role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'USER';
+        // Process and validate role
+        const processedRole = (role || 'STUDENT').toString().trim().toUpperCase();
+        if (!['STUDENT', 'INSTRUCTOR', 'ADMIN'].includes(processedRole)) {
+            return next(new AppError(`Invalid role: ${processedRole}. Must be one of: STUDENT, INSTRUCTOR, ADMIN`, 400));
+        }
 
-        // Save user in the database and log the user in
+        // Create new user with validated data
         const user = await userModel.create({
-            fullName,
-            email,
+            fullName: fullName.trim(),
+            email: email.trim().toLowerCase(),
             password,
-            number,
-            role: validRole, // Set the role based on input
+            number: number.trim(),
+            role: processedRole,
             avatar: {
                 public_id: email,
                 secure_url: "",
@@ -50,27 +54,14 @@ const register = async (req, res, next) => {
         const verificationToken = await user.generateEmailVerificationToken();
         await user.save();
 
+        // Send verification email
         const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
         const subject = 'Email Verification';
         const message = `Please verify your email by clicking on this link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`;
         
         await sendEmail(email, subject, message);
 
-        res.status(201).json({
-            success: true,
-            message: "Registration successful. Please check your email to verify your account.",
-            user
-        });
-
-        if (!user) {
-            return next(new AppError("User registration failed, please try again", 400));
-        }
-
-        
-
-        
-
-        // File upload
+        // Handle file upload if present
         if (req.file) {
             try {
                 const result = await cloudinary.v2.uploader.upload(req.file.path, {
@@ -78,40 +69,40 @@ const register = async (req, res, next) => {
                     width: 250,
                     height: 250,
                     gravity: "faces",
-                    crop: "fill",
+                    crop: "fill"
                 });
 
                 if (result) {
                     user.avatar.public_id = result.public_id;
                     user.avatar.secure_url = result.secure_url;
-
-                    // Remove the file from the server
-                    fs.rmSync(`uploads/${req.file.filename}`);
+                    await user.save();
                 }
-            } 
-            
-            catch (e) {
-                return next(new AppError(e.message || "File not uploaded, please try again", 500));
+
+                fs.rmSync(`uploads/${req.file.filename}`);
+            } catch (error) {
+                console.error('File upload error:', error);
             }
         }
 
-        await user.save();
-
+        // Remove password from response
         user.password = undefined;
 
+        // Generate JWT token
         const token = await user.generateJWTToken();
-
         res.cookie("token", token, cookieOptions);
 
         res.status(201).json({
             success: true,
-            message: "User registered successfully",
-            user,
+            message: "Registration successful. Please check your email to verify your account.",
+            user
         });
-    } 
-    
-    catch (e) {
-        return next(new AppError(e.message, 500));
+
+    } catch (error) {
+        console.error('Registration error:', error);
+        if (error.name === 'ValidationError') {
+            console.error('Validation error details:', error.errors);
+        }
+        return next(new AppError(error.message || "Registration failed", 500));
     }
 };
 

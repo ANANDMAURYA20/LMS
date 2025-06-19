@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import HomePage from "./Pages/HomePage";
 import AboutUs from "./Pages/About";
@@ -18,16 +18,20 @@ import ResendVerification from "./Pages/ResendVerification";
 
 import RequireAuth from "./Components/auth/RequireAuth";
 import CreateCourse from "./Pages/Course/CreateCourse";
+import CourseRequestForm from "./Pages/Course/CourseRequestForm";
+import LectureRequestForm from "./Pages/Course/LectureRequestForm";
+import AddLectureForm from "./Pages/Course/AddLectureForm";
 import Profile from "./Pages/User/Profile";
 import Checkout from "./Pages/Payment/Checkout";
 import CheckoutSuccess from "./Pages/Payment/CheckoutSuccess";
 import CheckoutFail from "./Pages/Payment/CheckoutFail";
 import DisplayLecture from "./Pages/Dashboard/DisplayLecture";
+// Remove this line
 import AddLecture from "./Pages/Dashboard/AddLecture";
-import AdminDashboard from "./Pages/Dashboard/AdminDashboard";
+import AdminDashboard from './Pages/Dashboard/AdminDashboard';
+import AdminApprovalDashboard from "./Pages/Dashboard/AdminApprovalDashboard";
 import Userdata from "./Pages/Dashboard/Userdata";
 import AdminUserEdit from "./Pages/Dashboard/AdminUserEdit"; 
-
 
 import Blog from "./Pages/Blog";
 import AddBlog from "./Pages/Dashboard/AddBlog";
@@ -51,6 +55,7 @@ function App() {
 
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/course/create" element={<Navigate to="/course/request" replace />} />
         <Route
           path="/user/profile/reset-password"
           element={<ForgotPassword />}
@@ -65,24 +70,26 @@ function App() {
 
         <Route element={<RequireAuth allowedRoles={["INSTRUCTOR", "ADMIN"]} />}>
           <Route path="/instructor/courses" element={<InstructorDashboard />} />
-          <Route path="/course/create" element={<CreateCourse />} />
+          <Route path="/course/request" element={<CourseRequestForm />} />
+          <Route path="/course/:courseId/lecture/request" element={<LectureRequestForm />} />
+          <Route path="/course/:courseId/lecture/add" element={<AddLectureForm />} />
           <Route path="/course/edit/:courseId" element={<EditCourse />} />
-          <Route path="/course/addlecture" element={<AddLecture />} />
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={["USER", "ADMIN", "INSTRUCTOR"]} />}>
+        <Route element={<RequireAuth allowedRoles={["STUDENT", "ADMIN", "INSTRUCTOR"]} />}>
           <Route path="/user/profile" element={<Profile />} />
           <Route path="/user/profile/change-password" element={<ChangePassword />}/>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
           <Route path="/checkout/fail" element={<CheckoutFail />} />
-          <Route path="/course/displaylectures" element={<DisplayLecture />} />
+          <Route path="/courses/:courseId/lectures" element={<DisplayLecture />} />
           <Route path="/user/progress" element={<ProgressDashboard />} />
         </Route>
 
         <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
           <Route path="/admin/scores" element={<StudentScores />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/approvals" element={<AdminApprovalDashboard />} />
           <Route path="/admin/userdata" element={<Userdata />} />
           <Route path="/admin/addblog" element={<AddBlog />} />
           <Route path="/admin/users/:userId/edit" element={<AdminUserEdit />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCourseLectures,
@@ -16,6 +16,7 @@ export default function DisplayLecture() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { state } = useLocation();
+  const { courseId } = useParams();
   const { lectures } = useSelector((state) => state.lecture);
   const { role, data } = useSelector((state) => state.auth);
 
@@ -24,6 +25,14 @@ export default function DisplayLecture() {
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [deletingLecture, setDeletingLecture] = useState(null);
+
+  useEffect(() => {
+    if (!courseId) {
+      navigate("/courses");
+      return;
+    }
+    dispatch(getCourseLectures(courseId));
+  }, [courseId, dispatch]);
 
   // Reset quiz state when changing lectures
   const handleLectureChange = (idx) => {
@@ -36,13 +45,24 @@ export default function DisplayLecture() {
   async function onLectureDelete(courseId, lectureId) {
     try {
       const loadingToast = toast.loading("Deleting lecture...");
-      await dispatch(deleteCourseLecture({ courseId: courseId, lectureId: lectureId }));
+      
+      // Delete the lecture using axios directly
+      await axiosInstance.delete(`/api/v1/courses/${courseId}/lectures/${lectureId}`);
+      
+      // Refresh the lectures list
       await dispatch(getCourseLectures(courseId));
-      toast.success("Lecture deleted successfully", { id: loadingToast });
+      
+      toast.success("Lecture deleted successfully", { 
+        id: loadingToast,
+        duration: 3000
+      });
+      
       setDeletingLecture(null);
     } catch (error) {
-      toast.error("Failed to delete lecture");
       console.error("Delete lecture error:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete lecture", {
+        duration: 3000
+      });
     }
   }
 
@@ -51,62 +71,47 @@ export default function DisplayLecture() {
     setDeletingLecture({ courseId, lectureId, title: lectureTitle });
   };
 
-  useEffect(() => {
-    if (!state) navigate("/courses");
-    dispatch(getCourseLectures(state._id));
-  }, []);
-  
   const handlePdfDownload = (secure_url) => {
     window.open(secure_url, '_blank');
   };
 
-  const handleOptionSelect = (questionIndex, optionIndex) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionIndex]: optionIndex
-    });
+  const handleAnswerSelect = (questionIndex, optionIndex) => {
+    if (!showResults) {
+      setSelectedAnswers({
+        ...selectedAnswers,
+        [questionIndex]: optionIndex
+      });
+    }
   };
 
-  const handleSubmitQuiz = async () => {
-    const currentQuestions = lectures[currentVideo]?.questions || [];
-    
-    // Check if all questions are answered
-    const unansweredQuestions = currentQuestions.filter((_, index) => 
-      selectedAnswers[index] === undefined
-    );
+  const handleSubmitQuiz = () => {
+    const currentLecture = lectures[currentVideo];
+    if (!currentLecture?.questions || currentLecture.questions.length === 0) return;
 
-    if (unansweredQuestions.length > 0) {
-      toast.error(`Please answer all questions before submitting.`);
-      return;
-    }
-    
     let correctAnswers = 0;
-    currentQuestions.forEach((question, index) => {
+    currentLecture.questions.forEach((question, index) => {
       if (selectedAnswers[index] === question.correctOption) {
         correctAnswers++;
       }
     });
-    
-    const percentage = (correctAnswers / currentQuestions.length) * 100;
-    setScore(percentage);
+
+    const calculatedScore = (correctAnswers / currentLecture.questions.length) * 100;
+    setScore(calculatedScore);
     setShowResults(true);
 
     // Save score to backend
-    try {
-      const response = await axiosInstance.post('/api/v1/scores', {
-        courseId: state._id,
-        lectureId: lectures[currentVideo]._id,
-        score: percentage,
-        questionsAttempted: currentQuestions.length,
-        correctAnswers
-      });
+    saveScore(calculatedScore);
+  };
 
-      if (response.data.success) {
-        toast.success('Quiz submitted and score saved successfully!');
-      }
+  const saveScore = async (score) => {
+    try {
+      await axiosInstance.post('/api/v1/scores', {
+        courseId: courseId,
+        lectureId: lectures[currentVideo]._id,
+        score: score
+      });
     } catch (error) {
-      toast.error('Failed to save score');
-      console.error('Score saving error:', error);
+      console.error('Error saving score:', error);
     }
   };
 
@@ -149,14 +154,9 @@ export default function DisplayLecture() {
     setScore(0);
   };
 
-  // Function to check if instructor owns the course
-  const isInstructorCourse = () => {
-    return role === "INSTRUCTOR" && state?.instructor === data?._id;
-  };
-
   // Function to check if user can manage lectures
   const canManageLectures = () => {
-    return role === "ADMIN" || isInstructorCourse();
+    return role === "ADMIN" || (role === "INSTRUCTOR" && state?.instructor === data?._id);
   };
 
   return (
@@ -216,11 +216,29 @@ export default function DisplayLecture() {
                   <h3 className="text-xl font-bold text-[#2320f7]">Lectures List</h3>
                   {canManageLectures() && (
                     <button
-                      onClick={() => navigate("/course/addlecture", { state: { ...state } })}
+                      onClick={() => {
+                        if (role === 'ADMIN') {
+                          navigate(`/course/${courseId}/lecture/add`, { 
+                            state: { 
+                              _id: courseId,
+                              title: state?.title,
+                              instructor: state?.instructor 
+                            } 
+                          });
+                        } else {
+                          navigate(`/course/${courseId}/lecture/request`, { 
+                            state: { 
+                              _id: courseId,
+                              title: state?.title,
+                              instructor: state?.instructor 
+                            } 
+                          });
+                        }
+                      }}
                       className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-md"
                     >
                       <FaPlus className="text-sm" />
-                      <span>Add Lecture</span>
+                      <span>{role === 'ADMIN' ? 'Add Lecture' : 'Request Lecture'}</span>
                     </button>
                   )}
                 </div>
@@ -272,7 +290,7 @@ export default function DisplayLecture() {
                             
                             {canManageLectures() && (
                               <button
-                                onClick={() => handleDeleteClick(state?._id, lecture?._id, lecture?.title)}
+                                onClick={() => handleDeleteClick(courseId, lecture?._id, lecture?.title)}
                                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300"
                               >
                                 <FaTrash className="text-xs" />
@@ -325,13 +343,13 @@ export default function DisplayLecture() {
                                 ? 'bg-blue-50 dark:bg-blue-900'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                             }`}
-                          onClick={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                          onClick={() => !showResults && handleAnswerSelect(qIndex, oIndex)}
                         >
                           <input
                             type="radio"
                             name={`question-${qIndex}`}
                             checked={selectedAnswers[qIndex] === oIndex}
-                            onChange={() => !showResults && handleOptionSelect(qIndex, oIndex)}
+                            onChange={() => !showResults && handleAnswerSelect(qIndex, oIndex)}
                             className="w-4 h-4"
                             disabled={showResults}
                           />

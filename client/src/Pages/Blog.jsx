@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useScroll, useTransform } from 'framer-motion';
 import { axiosInstance } from '../Helpers/axiosInstance';
 import toast from 'react-hot-toast';
+import { FaGraduationCap } from 'react-icons/fa';
 
 const Blog = () => {
   const { id } = useParams();
@@ -56,42 +57,29 @@ const Blog = () => {
     fetchData();
   }, [id, navigate]);
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+  return (
+    <Layout>
+      {loading ? (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 dark:border-blue-400"
+            className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"
           />
         </div>
-      </Layout>
-    );
-  }
-
-  if (error) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      ) : error ? (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
           <div className="text-white text-xl mb-4">{error}</div>
           <button
             onClick={() => navigate('/blog')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-300"
           >
             Back to Blogs
           </button>
         </div>
-      </Layout>
-    );
-  }
-
-  // Single Blog View
-  if (id && currentBlog) {
-    return (
-      <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      ) : id && currentBlog ? (
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
           <div className="container mx-auto px-4 py-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -101,12 +89,12 @@ const Blog = () => {
             >
               <button
                 onClick={() => navigate('/blog')}
-                className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2"
+                className="mb-6 text-orange-400 hover:text-orange-500 flex items-center gap-2"
               >
                 ← Back to Blogs
               </button>
               
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl overflow-hidden shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
+              <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl overflow-hidden shadow-lg border border-gray-700">
                 {currentBlog.thumbnail && currentBlog.thumbnail.secure_url && (
                   <img
                     src={currentBlog.thumbnail.secure_url}
@@ -121,105 +109,101 @@ const Blog = () => {
                   <p className="text-gray-300 text-lg mb-6">
                     {currentBlog.description}
                   </p>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center">
                     <span className="text-sm text-gray-400">
                       Created: {new Date(currentBlog.createdAt).toLocaleDateString()}
                     </span>
-                    <motion.a
-                      href={currentBlog.link}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 backdrop-blur-sm"
-                    >
-                      Read Full Article
-                    </motion.a>
                   </div>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
-      </Layout>
-    );
-  }
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+          <div className="container mx-auto px-4 py-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12"
+            >
+              <h1 className="md:text-4xl text-2xl text-white font-inter font-[500] relative inline-block">
+                Blogs By{" "}
+                <span className="font-[600] font-lato text-orange-500">
+                  Instructor
+                </span>
+                <motion.div
+                  className="absolute bottom-0 left-0 h-1 bg-orange-500"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                />
+              </h1>
+            </motion.div>
 
-  // Blog List View
-  return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12"
-          >
-            <h1 className="md:text-4xl text-2xl text-white font-inter font-[500] relative inline-block">
-              Blogs By{" "}
-              <span className="font-[600] font-lato text-blue-400">
-                Ai-Tutor
-              </span>
-              <motion.div
-                className="absolute bottom-0 left-0 h-1 bg-blue-500"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-              />
-            </h1>
-          </motion.div>
-
-          <motion.div 
-            style={{ y: y1, opacity: opacity1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {blogs.map((blog, index) => (
-              <motion.div
-                key={blog._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                whileHover={{ scale: 1.02 }}
-                className="backdrop-blur-lg bg-white/10 dark:bg-gray-800/30 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20 cursor-pointer"
-                onClick={() => navigate(`/blog/${blog._id}`)}
-              >
-                {blog.thumbnail && blog.thumbnail.secure_url && (
-                  <motion.img
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8 }}
-                    src={blog.thumbnail.secure_url}
-                    alt={blog.title}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-white mb-2">
-                    {blog.title}
-                  </h2>
-                  <p className="text-gray-300 text-sm mb-4">
-                    {blog.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">
-                      Created: {new Date(blog.createdAt).toLocaleDateString()}
-                    </span>
-                    <motion.button 
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-300 backdrop-blur-sm"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      Read More
-                    </motion.button>
+            <motion.div 
+              style={{ y: y1, opacity: opacity1 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {blogs.map((blog, index) => (
+                <motion.div
+                  key={blog._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition group cursor-pointer border border-gray-700"
+                  onClick={() => navigate(`/blog/${blog._id}`)}
+                >
+                  <div className="relative">
+                    {blog.thumbnail && blog.thumbnail.secure_url && (
+                      <img
+                        src={blog.thumbnail.secure_url}
+                        alt={blog.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                    <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      Blog Post
+                    </div>
                   </div>
-                </div>
+                  <div className="p-6">
+                    <div className="flex items-center mb-3">
+                      <FaGraduationCap className="text-orange-500 text-xl mr-2" />
+                      <h2 className="text-xl font-semibold text-white">
+                        {blog.title}
+                      </h2>
+                    </div>
+                    <p className="text-gray-300 mb-4 line-clamp-2">
+                      {blog.description}
+                    </p>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-400">
+                        Created: {new Date(blog.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Empty State */}
+            {(!blogs || blogs.length === 0) && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-12 bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-gray-700 max-w-2xl mx-auto"
+              >
+                <p className="text-gray-300 text-lg md:text-xl mb-4">
+                  No blogs available at the moment.
+                </p>
               </motion.div>
-            ))}
-          </motion.div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </Layout>
   );
 };
